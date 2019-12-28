@@ -1,0 +1,98 @@
+%{
+#include <stdio.h>
+#include <string>
+
+using namespace std;
+
+int yylex();
+int yyerror(string);
+extern FILE *yyin;
+extern int yylineno;
+
+%}
+
+%union token_val {
+    char* pid;
+    long long num;
+}
+
+%start program
+%token DECLARE BEGON END
+%token ASSIGN IF THEN ELSE ENDIF WHILE DO ENDWHILE ENDDO FOR FROM TO ENDFOR
+%token READ WRITE
+%token EQ NEQ LE GE LEQ GEQ
+%token NUM
+%token PID
+
+%left MINUS PLUS
+%left TIMES DIV MOD
+
+%token ERROR
+
+%%
+program: DECLARE declarations BEGON commands END
+       | BEGON commands END
+       ;
+
+declarations: declarations',' PID
+            | declarations',' PID '(' NUM ':' NUM ')'
+            |
+            ;
+
+commands: commands command
+        | command
+        ;
+
+command: identifier ASSIGN expression ';'
+       | IF condition THEN commands ELSE commands ENDIF
+       | IF condition THEN commands ENDIF
+       | WHILE condition DO commands ENDWHILE
+       | DO commands WHILE condition ENDDO
+       | FOR PID FROM value TO value DO commands ENDFOR
+       | READ identifier ';'
+       | WRITE value ';'
+       ;
+
+expression: value
+          | value PLUS value
+          | value MINUS value
+          | value TIMES value
+          | value DIV value
+          | value MOD value
+          ;
+
+condition: value EQ value
+         | value NEQ value
+         | value LE value
+         | value GE value
+         | value LEQ value
+         | value GEQ value
+         ;
+
+value: NUM
+     | identifier
+     ;
+
+identifier: PID
+          | PID '(' PID ')'
+          | PID '(' NUM ')'
+          ;
+
+%%
+
+int yyerror(string s)
+{
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc != 2)
+    {
+        return 1;
+    }
+
+    yyin = fopen(argv[1], "r");
+    yyparse();
+    return 0;
+}
