@@ -1,6 +1,14 @@
 %{
 #include <stdio.h>
 #include <string>
+#include <memory>
+#include <iostream>
+
+#define output cout
+
+#include "Memory.hpp"
+#include "Variable.hpp"
+#include "io.hpp"
 
 using namespace std;
 
@@ -9,48 +17,60 @@ int yyerror(string);
 extern FILE *yyin;
 extern int yylineno;
 
+shared_ptr<Memory> memory;
+
 %}
 
 %union token_val {
     char* pid;
     long long num;
+    Variable var;
 }
 
 %start program
-%token DECLARE BEGON END
+%token DECLARE T_BEGIN END
 %token ASSIGN IF THEN ELSE ENDIF WHILE DO ENDWHILE ENDDO FOR FROM TO ENDFOR
 %token READ WRITE
 %token EQ NEQ LE GE LEQ GEQ
-%token NUM
-%token PID
+%token <num> NUM
+%token <pid> PID
 
 %left MINUS PLUS
 %left TIMES DIV MOD
 
 %token ERROR
 
+%type <var> identifier
+
 %%
-program: DECLARE declarations BEGON commands END
-       | BEGON commands END
+program: DECLARE declarations T_BEGIN commands END
+       | T_BEGIN commands END
        ;
 
-declarations: declarations',' PID
-            | declarations',' PID '(' NUM ':' NUM ')'
-            |
+declarations: declarations',' declaration 
+            | declarations',' arr_declaration
+            | declaration
+            | arr_declaration
             ;
+
+declaration: PID { memory->reserve_variable($1); }
+           ;
+
+arr_declaration: PID'('NUM':'NUM')' { memory->reserve_array($1, $3, $5); }
+               ;
 
 commands: commands command
         | command
         ;
 
-command: identifier ASSIGN expression ';'
+command: identifier ASSIGN expression';'                    {  output << $1.assign() << endl; }
        | IF condition THEN commands ELSE commands ENDIF
        | IF condition THEN commands ENDIF
        | WHILE condition DO commands ENDWHILE
        | DO commands WHILE condition ENDDO
        | FOR PID FROM value TO value DO commands ENDFOR
-       | READ identifier ';'
-       | WRITE value ';'
+       | READ identifier';'                                 { output << read($2) << endl; }
+       | WRITE value';'                                     { output << write() << endl;}
        ;
 
 expression: value
@@ -73,9 +93,9 @@ value: NUM
      | identifier
      ;
 
-identifier: PID
-          | PID '(' PID ')'
-          | PID '(' NUM ')'
+identifier: PID             { $$ = memory->get_variable($1); }
+          | PID '(' PID ')' { $$ = memory->get_variable($1, $3); }
+          | PID '(' NUM ')' { $$ = memory->get_variable($1, $3); }
           ;
 
 %%
@@ -91,6 +111,8 @@ int main(int argc, char* argv[])
     {
         return 1;
     }
+
+    memory = make_shared<Memory>();
 
     yyin = fopen(argv[1], "r");
     yyparse();

@@ -2,7 +2,9 @@
 %option yylineno
 %{
 
+#include "Variable.hpp"
 #include "parser.tab.hpp"
+
 #include <string>
 
 int yylex();
@@ -14,7 +16,7 @@ PUNCT                   [\(\)\:\;]
 
 %%
 "DECLARE"               { return DECLARE; }
-"BEGIN"                 { return BEGON; }
+"BEGIN"                 { return T_BEGIN; }
 "END"                   { return END; }
 
 "READ"                  { return READ; }
