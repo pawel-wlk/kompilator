@@ -3,9 +3,11 @@
 %{
 
 #include "Variable.hpp"
+#include "Value.hpp"
 #include "parser.tab.hpp"
 
 #include <string>
+#include <iostream>
 
 int yylex();
 %}

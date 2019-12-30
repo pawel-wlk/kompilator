@@ -8,6 +8,7 @@
 
 #include "Memory.hpp"
 #include "Variable.hpp"
+#include "Value.hpp"
 #include "io.hpp"
 
 using namespace std;
@@ -24,7 +25,8 @@ shared_ptr<Memory> memory;
 %union token_val {
     char* pid;
     long long num;
-    Variable var;
+    Variable* var;
+    Value val;
 }
 
 %start program
@@ -41,6 +43,7 @@ shared_ptr<Memory> memory;
 %token ERROR
 
 %type <var> identifier
+%type <val> value
 
 %%
 program: DECLARE declarations T_BEGIN commands END
@@ -63,14 +66,14 @@ commands: commands command
         | command
         ;
 
-command: identifier ASSIGN expression';'                    {  output << $1.assign() << endl; }
+command: identifier ASSIGN expression';'                    {  output << $1->assign() << endl; }
        | IF condition THEN commands ELSE commands ENDIF
        | IF condition THEN commands ENDIF
        | WHILE condition DO commands ENDWHILE
        | DO commands WHILE condition ENDDO
        | FOR PID FROM value TO value DO commands ENDFOR
        | READ identifier';'                                 { output << read($2) << endl; }
-       | WRITE value';'                                     { output << write() << endl;}
+       | WRITE value';'                                     { output << write($2) << endl;}
        ;
 
 expression: value
@@ -89,8 +92,8 @@ condition: value EQ value
          | value GEQ value
          ;
 
-value: NUM
-     | identifier
+value: NUM          { $$ = {$1, nullptr}; }
+     | identifier   { $$ = {0, $1}; }
      ;
 
 identifier: PID             { $$ = memory->get_variable($1); }
@@ -109,6 +112,7 @@ int main(int argc, char* argv[])
 {
     if (argc != 2)
     {
+        cout << "Not enough arguments" << argc << endl;
         return 1;
     }
 

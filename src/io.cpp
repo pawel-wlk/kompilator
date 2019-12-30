@@ -1,11 +1,12 @@
 #include "io.hpp"
 
-string read(Variable var)
+
+string read(Variable* var)
 {
-  return "GET STORE " + to_string(var.address);
+  return "GET STORE " + to_string(var->address);
 }
 
-string write()
+string write(Value val)
 {
-  return "";
+  return (val.variable == nullptr  ? val.construct() : val.variable->load()) + " PUT";
 }

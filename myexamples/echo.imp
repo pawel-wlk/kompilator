@@ -1,0 +1,6 @@
+DECLARE
+  test
+BEGIN
+  READ test;
+  WRITE test;
+END

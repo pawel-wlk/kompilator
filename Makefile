@@ -3,7 +3,7 @@ all: bin kompilator
 bin:
 	mkdir -p bin
 
-kompilator: bin/parser.o bin/lexer.o bin/Memory.o bin/Variable.o bin/io.o
+kompilator: bin/parser.o bin/lexer.o bin/Memory.o bin/Variable.o bin/Value.o bin/io.o
 	g++ -o $@ $^
 
 bin/parser.o: bin/parser.tab.cpp
@@ -22,6 +22,9 @@ bin/Memory.o: src/Memory.cpp
 	g++ -c $^ -o $@
 
 bin/Variable.o: src/Variable.cpp
+	g++ -c $^ -o $@
+
+bin/Value.o: src/Value.cpp
 	g++ -c $^ -o $@
 
 bin/io.o: src/io.cpp

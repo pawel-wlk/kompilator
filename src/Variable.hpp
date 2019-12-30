@@ -13,4 +13,5 @@ struct Variable
   unsigned int dependency;
 
   string assign();
+  string load();
 };
