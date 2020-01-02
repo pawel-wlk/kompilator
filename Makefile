@@ -13,7 +13,7 @@ bin/lexer.o: bin/lexer.c
 	g++ -c $^ -o $@
 
 bin/parser.tab.cpp: src/parser.ypp
-	bison -d $^ -o $@ && cp src/*.hpp bin
+	bison -d $^ -o $@
     
 bin/lexer.c: src/lexer.l
 	flex -o $@ $^

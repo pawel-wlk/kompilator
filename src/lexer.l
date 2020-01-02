@@ -2,8 +2,8 @@
 %option yylineno
 %{
 
-#include "Variable.hpp"
-#include "Value.hpp"
+#include "../src/Variable.hpp"
+#include "../src/Value.hpp"
 #include "parser.tab.hpp"
 
 #include <string>

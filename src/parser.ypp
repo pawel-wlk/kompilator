@@ -5,10 +5,10 @@
 
 #define output cout
 
-#include "Memory.hpp"
-#include "Variable.hpp"
-#include "Value.hpp"
-#include "io.hpp"
+#include "../src/Memory.hpp"
+#include "../src/Variable.hpp"
+#include "../src/Value.hpp"
+#include "../src/io.hpp"
 
 using namespace std;
 
@@ -31,11 +31,10 @@ Memory* memory;
 %start program
 %token DECLARE T_BEGIN END
 %token ASSIGN IF THEN ELSE ENDIF WHILE DO ENDWHILE ENDDO FOR FROM TO ENDFOR
-%token READ WRITE
-%token SEMICOLON LPAREN RPAREN COMMA COLON
 %token EQ NEQ LE GE LEQ GEQ
 %token <num> NUM
 %token <pid> PID
+%token READ WRITE SEMICOLON LPAREN RPAREN COMMA COLON
 
 %left MINUS PLUS
 %left TIMES DIV MOD
@@ -54,6 +53,7 @@ declarations: declarations COMMA declaration
             | declarations COMMA arr_declaration
             | declaration
             | arr_declaration
+            |
             ;
 
 declaration: PID { memory->reserve_variable($1); }

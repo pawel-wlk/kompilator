@@ -1,8 +1,7 @@
 #pragma once
 
-class Variable
+struct Variable
 {
-public:
   unsigned int address;
   unsigned int start;
   unsigned int end;
