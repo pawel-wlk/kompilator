@@ -9,10 +9,10 @@
 #include <string>
 #include <iostream>
 
+using namespace std;
+
 int yylex();
 %}
-
-PUNCT                   [\(\)\:\;]
 
 %x COMMENT
 
@@ -58,7 +58,7 @@ PUNCT                   [\(\)\:\;]
 ","                     { return COMMA; }
 "("                     { return LPAREN; }
 ")"                     { return RPAREN; }
-[_a-z]+                 { yylval.pid = yytext; return PID; }
+[_a-z]+                 { yylval.pid = new string(yytext); return PID; }
 [0-9]+                  { yylval.num = std::stoll(yytext); return NUM; }
 \[.*\]                  
 "["                     { BEGIN(COMMENT); }

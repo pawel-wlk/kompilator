@@ -1,4 +1,5 @@
 %{
+#define YYDEBUG 1
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -22,26 +23,32 @@ Memory* memory;
 %}
 
 %union token_val {
-    char* pid;
+    string* pid;
     long long num;
     Variable* var;
     Value val;
 }
 
 %start program
+
 %token DECLARE T_BEGIN END
-%token ASSIGN IF THEN ELSE ENDIF WHILE DO ENDWHILE ENDDO FOR FROM TO ENDFOR
-%token EQ NEQ LE GE LEQ GEQ
-%token <num> NUM
+%token IF WHILE DO
+%token FOR 
+%token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
+%token READ WRITE       
+%token LE GE LEQ GEQ EQ NEQ
+%token ASSIGN
+%token ERROR
+
 %token <pid> PID
-%token READ WRITE SEMICOLON LPAREN RPAREN COMMA COLON
+%token <num> NUM
+
+%type <var> identifier
 
 %left MINUS PLUS
 %left TIMES DIV MOD
+%token SEMICOLON COLON COMMA LPAREN RPAREN
 
-%token ERROR
-
-%type <var> identifier
 
 
 %%
@@ -53,27 +60,26 @@ declarations: declarations COMMA declaration
             | declarations COMMA arr_declaration
             | declaration
             | arr_declaration
-            |
             ;
 
-declaration: PID { memory->reserve_variable($1); }
+declaration: PID { memory->reserve_variable(*$1); }
            ;
 
-arr_declaration: PID LPAREN NUM COLON NUM RPAREN { memory->reserve_array($1, $3, $5); }
+arr_declaration: PID LPAREN NUM COLON NUM RPAREN { memory->reserve_array(*$1, $3, $5); }
                ;
 
 commands: commands command
         | command
         ;
 
-command: identifier ASSIGN expression SEMICOLON
+command: identifier ASSIGN expression SEMICOLON 
        | IF condition THEN commands ELSE commands ENDIF
        | IF condition THEN commands ENDIF
        | WHILE condition DO commands ENDWHILE
        | DO commands WHILE condition ENDDO
        | FOR PID FROM value TO value DO commands ENDFOR
-       | READ identifier SEMICOLON
-       | WRITE value SEMICOLON
+       | READ identifier SEMICOLON 
+       | WRITE value SEMICOLON 
        ;
 
 expression: value
@@ -99,7 +105,7 @@ value: NUM
 identifier: PID                   {
                                       try
                                       {
-                                          $$ = memory->get_variable($1);  
+                                          $$ = memory->get_variable(*$1);  
                                       }
                                       catch (string error)
                                       {
@@ -109,7 +115,7 @@ identifier: PID                   {
           | PID LPAREN PID RPAREN {
                                       try
                                       {
-                                          $$ = memory->get_variable($1, $3);
+                                          $$ = memory->get_variable(*$1, *$3);
                                       }
                                       catch (string error)
                                       {
@@ -119,7 +125,7 @@ identifier: PID                   {
           | PID LPAREN NUM RPAREN {
                                       try
                                       {
-                                          $$ = memory->get_variable($1, $3);
+                                          $$ = memory->get_variable(*$1, $3);
                                       }
                                       catch (string error)
                                       {
@@ -138,6 +144,7 @@ int yyerror(string s)
 
 int main(int argc, char* argv[])
 {
+    // yydebug = 1;
     if (argc != 2)
     {
         cout << "Not enough arguments" << argc << endl;
