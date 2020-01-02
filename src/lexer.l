@@ -53,9 +53,13 @@ PUNCT                   [\(\)\:\;]
 "DIV"                   { return DIV; }
 "MOD"                   { return MOD; }
 "TIMES"                 { return TIMES; }
+";"                     { return SEMICOLON; }
+":"                     { return COLON; }
+","                     { return COMMA; }
+"("                     { return LPAREN; }
+")"                     { return RPAREN; }
 [_a-z]+                 { yylval.pid = yytext; return PID; }
 [0-9]+                  { yylval.num = std::stoll(yytext); return NUM; }
-{PUNCT}                 { return yytext[0]; }
 \[.*\]                  
 "["                     { BEGIN(COMMENT); }
 <COMMENT>{

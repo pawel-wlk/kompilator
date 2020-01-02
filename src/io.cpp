@@ -8,5 +8,6 @@ string read(Variable* var)
 
 string write(Value val)
 {
-  return (val.variable == nullptr  ? val.construct() : val.variable->load()) + " PUT";
+  // return (val.variable == nullptr  ? val.construct() : val.variable->load()) + " PUT";
+  return "";
 }

@@ -2,55 +2,55 @@
 
 void Memory::reserve_variable(const char* pid)
 {
-  this->variables[pid] = new Variable;
-  this->variables[pid]->address = ++this->var_count;
-
+  this->variables[pid] = new Variable(++this->var_count);
 }
 
 void Memory::reserve_array(const char* pid, unsigned int start, unsigned int end)
 {
+  this->variables[pid] = new Variable(this->var_count+1, start, end);
   auto length = end - start + 1;
-  // this->variables[pid] = {this->var_count+1, start, end, true, 0};
-  this->variables[pid] = new Variable;
-  this->variables[pid]->address = ++this->var_count;
-  this->variables[pid]->start = start;
-  this->variables[pid]->end = end;
-  this->variables[pid]->is_array = true;
+  this->var_count += length;
 }
 
 Variable* Memory::get_variable(const char* pid)
 {
+  if (this->variables.find(pid) == this->variables.end())
+  {
+    throw (string) pid + " is not defined";
+  }
   return this->variables[pid];
 }
 
 Variable* Memory::get_variable(const char* pid, unsigned int index)
 {
+  if (this->variables.find(pid) == this->variables.end())
+  {
+    throw (string) pid + " is not defined";
+  }
   auto var = this->variables[pid];
 
-  // error handling - later
-  if (!var->is_array) return nullptr;
+  if (var->start == var->end)
+  {
+    throw (string) pid + " is not an array";
+  }
+  auto address = var->address + index - var->start;
 
-  if (index < var->start || index > var->end) return nullptr;
-
-  Variable* result = new Variable;
-  result->address = var->address+index-var->start;
-  return result;
+  return new Variable(address);
 }
 
 Variable* Memory::get_variable(const char* pid, const char* index)
 {
+  if (this->variables.find(pid) == this->variables.end())
+  {
+    throw (string) pid + " is not defined";
+  }
   auto var = this->variables[pid];
 
-  // error handling - later
-  if (!var->is_array) return nullptr;
+  if (var->start == var->end)
+  {
+    throw (string) pid + " is not an array";
+  }
+  auto dependency = this->variables[index];
 
-  auto dependency_addr = this->get_variable(index)->address;
-
-  auto result = new Variable;
-  result->address = var->address;
-  result->start = var->start;
-  result->end = var->end;
-  result->dependency = dependency_addr;
-
-  return result;
+  return new Variable(var->address, var->start, var->end, dependency->address);
 }

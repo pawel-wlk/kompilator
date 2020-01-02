@@ -1,28 +1,21 @@
 #include "Variable.hpp"
 
-string Variable::assign()
+Variable::Variable(unsigned int address)
 {
-  return "";
+  this->address = address;
 }
 
-string Variable::load()
+Variable::Variable(unsigned int address, unsigned int start, unsigned int end)
 {
-  string result;
+  this->address = address;
+  this->start = start;
+  this->end = end;
+}
 
-  if (dependency == 0)
-  {
-    result = "LOAD " + to_string(address);
-  }
-  else
-  {
-    result = "LOAD " + to_string(dependency) + " ";
-    for (int i=0; i < this->start; i++)
-    {
-      result += "INC ";
-    }
-
-    result += "LOADI 0";
-  }
-
-  return result;
+Variable::Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency)
+{
+  this->address = address;
+  this->start = start;
+  this->end = end;
+  this->dependency = dependency;
 }

@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 #include <string>
-#include <memory>
 #include <iostream>
 
 #define output cout
@@ -18,7 +17,7 @@ int yyerror(string);
 extern FILE *yyin;
 extern int yylineno;
 
-shared_ptr<Memory> memory;
+Memory* memory;
 
 %}
 
@@ -33,6 +32,7 @@ shared_ptr<Memory> memory;
 %token DECLARE T_BEGIN END
 %token ASSIGN IF THEN ELSE ENDIF WHILE DO ENDWHILE ENDDO FOR FROM TO ENDFOR
 %token READ WRITE
+%token SEMICOLON LPAREN RPAREN COMMA COLON
 %token EQ NEQ LE GE LEQ GEQ
 %token <num> NUM
 %token <pid> PID
@@ -43,15 +43,15 @@ shared_ptr<Memory> memory;
 %token ERROR
 
 %type <var> identifier
-%type <val> value
+
 
 %%
 program: DECLARE declarations T_BEGIN commands END
        | T_BEGIN commands END
        ;
 
-declarations: declarations',' declaration 
-            | declarations',' arr_declaration
+declarations: declarations COMMA declaration 
+            | declarations COMMA arr_declaration
             | declaration
             | arr_declaration
             ;
@@ -59,21 +59,21 @@ declarations: declarations',' declaration
 declaration: PID { memory->reserve_variable($1); }
            ;
 
-arr_declaration: PID'('NUM':'NUM')' { memory->reserve_array($1, $3, $5); }
+arr_declaration: PID LPAREN NUM COLON NUM RPAREN { memory->reserve_array($1, $3, $5); }
                ;
 
 commands: commands command
         | command
         ;
 
-command: identifier ASSIGN expression';'                    {  output << $1->assign() << endl; }
+command: identifier ASSIGN expression SEMICOLON
        | IF condition THEN commands ELSE commands ENDIF
        | IF condition THEN commands ENDIF
        | WHILE condition DO commands ENDWHILE
        | DO commands WHILE condition ENDDO
        | FOR PID FROM value TO value DO commands ENDFOR
-       | READ identifier';'                                 { output << read($2) << endl; }
-       | WRITE value';'                                     { output << write($2) << endl;}
+       | READ identifier SEMICOLON
+       | WRITE value SEMICOLON
        ;
 
 expression: value
@@ -92,19 +92,47 @@ condition: value EQ value
          | value GEQ value
          ;
 
-value: NUM          { $$ = {$1, nullptr}; }
-     | identifier   { $$ = {0, $1}; }
+value: NUM          
+     | identifier   
      ;
 
-identifier: PID             { $$ = memory->get_variable($1); }
-          | PID '(' PID ')' { $$ = memory->get_variable($1, $3); }
-          | PID '(' NUM ')' { $$ = memory->get_variable($1, $3); }
+identifier: PID                   {
+                                      try
+                                      {
+                                          $$ = memory->get_variable($1);  
+                                      }
+                                      catch (string error)
+                                      {
+                                          yyerror(error);
+                                      }
+                                  }
+          | PID LPAREN PID RPAREN {
+                                      try
+                                      {
+                                          $$ = memory->get_variable($1, $3);
+                                      }
+                                      catch (string error)
+                                      {
+                                          yyerror(error);
+                                      }
+                                  }
+          | PID LPAREN NUM RPAREN {
+                                      try
+                                      {
+                                          $$ = memory->get_variable($1, $3);
+                                      }
+                                      catch (string error)
+                                      {
+                                          yyerror(error);
+                                      }
+                                  }
           ;
 
 %%
 
 int yyerror(string s)
 {
+    cout << "Error in line " << yylineno << ": " << s << endl;
     return 0;
 }
 
@@ -116,7 +144,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    memory = make_shared<Memory>();
+    memory = new Memory();
 
     yyin = fopen(argv[1], "r");
     yyparse();

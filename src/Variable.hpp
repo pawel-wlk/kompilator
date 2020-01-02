@@ -1,17 +1,14 @@
 #pragma once
 
-#include<string>
-
-using namespace std;
-
-struct Variable
+class Variable
 {
+public:
   unsigned int address;
   unsigned int start;
   unsigned int end;
-  bool is_array;
   unsigned int dependency;
 
-  string assign();
-  string load();
+  Variable(unsigned int address);
+  Variable(unsigned int address, unsigned int start, unsigned int end);
+  Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency);
 };
