@@ -1,6 +1,8 @@
 #pragma once
 
-struct Variable
+#include "Value.hpp"
+
+struct Variable : public Value
 {
   unsigned int address;
   unsigned int start;

@@ -1,15 +1,6 @@
 #pragma once
 
-#include <string>
-
-#include "Variable.hpp"
-
-using namespace std;
-
-struct Value
+class Value
 {
-  long long constant;
-  Variable* variable;
-
-  string construct();
+  
 };

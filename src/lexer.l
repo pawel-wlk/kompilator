@@ -3,6 +3,7 @@
 %{
 
 #include "../src/Variable.hpp"
+#include "../src/Constant.hpp"
 #include "../src/Value.hpp"
 #include "parser.tab.hpp"
 

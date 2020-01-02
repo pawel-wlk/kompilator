@@ -8,6 +8,7 @@
 
 #include "../src/Memory.hpp"
 #include "../src/Variable.hpp"
+#include "../src/Constant.hpp"
 #include "../src/Value.hpp"
 #include "../src/io.hpp"
 
@@ -26,7 +27,7 @@ Memory* memory;
     string* pid;
     long long num;
     Variable* var;
-    Value val;
+    Value* val;
 }
 
 %start program
@@ -44,6 +45,7 @@ Memory* memory;
 %token <num> NUM
 
 %type <var> identifier
+%type <val> value
 
 %left MINUS PLUS
 %left TIMES DIV MOD
@@ -98,39 +100,18 @@ condition: value EQ value
          | value GEQ value
          ;
 
-value: NUM          
-     | identifier   
+value: NUM          { $$ = new Constant($1); }
+     | identifier   { $$ = $1; }
      ;
 
 identifier: PID                   {
-                                      try
-                                      {
-                                          $$ = memory->get_variable(*$1);  
-                                      }
-                                      catch (string error)
-                                      {
-                                          yyerror(error);
-                                      }
+                                    $$ = memory->get_variable(*$1);  
                                   }
           | PID LPAREN PID RPAREN {
-                                      try
-                                      {
-                                          $$ = memory->get_variable(*$1, *$3);
-                                      }
-                                      catch (string error)
-                                      {
-                                          yyerror(error);
-                                      }
+                                    $$ = memory->get_variable(*$1, *$3);
                                   }
           | PID LPAREN NUM RPAREN {
-                                      try
-                                      {
-                                          $$ = memory->get_variable(*$1, $3);
-                                      }
-                                      catch (string error)
-                                      {
-                                          yyerror(error);
-                                      }
+                                    $$ = memory->get_variable(*$1, $3);
                                   }
           ;
 
@@ -154,6 +135,13 @@ int main(int argc, char* argv[])
     memory = new Memory();
 
     yyin = fopen(argv[1], "r");
-    yyparse();
+    try
+    {
+        yyparse();
+    }
+    catch (string error)
+    {
+        yyerror(error);
+    }
     return 0;
 }
