@@ -3,4 +3,5 @@ DECLARE
 BEGIN
   READ test;
   WRITE test;
+  WRITE 5;
 END

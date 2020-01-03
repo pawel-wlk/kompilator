@@ -12,4 +12,7 @@ struct Variable : public Value
   Variable(unsigned int address);
   Variable(unsigned int address, unsigned int start, unsigned int end);
   Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency);
+
+  string construct();
+  string store();
 };

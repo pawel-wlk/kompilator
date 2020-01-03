@@ -3,14 +3,13 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
-
-#define output cout
+#include <fstream>
 
 #include "../src/Memory.hpp"
 #include "../src/Variable.hpp"
 #include "../src/Constant.hpp"
 #include "../src/Value.hpp"
-#include "../src/io.hpp"
+#include "../src/Code.hpp"
 
 using namespace std;
 
@@ -19,6 +18,7 @@ int yyerror(string);
 extern FILE *yyin;
 extern int yylineno;
 
+Code* code;
 Memory* memory;
 
 %}
@@ -80,8 +80,8 @@ command: identifier ASSIGN expression SEMICOLON
        | WHILE condition DO commands ENDWHILE
        | DO commands WHILE condition ENDDO
        | FOR PID FROM value TO value DO commands ENDFOR
-       | READ identifier SEMICOLON 
-       | WRITE value SEMICOLON 
+       | READ identifier SEMICOLON                       { code->read($2); }
+       | WRITE value SEMICOLON                           { code->write($2); }
        ;
 
 expression: value
@@ -126,13 +126,14 @@ int yyerror(string s)
 int main(int argc, char* argv[])
 {
     // yydebug = 1;
-    if (argc != 2)
+    if (argc != 3)
     {
         cout << "Not enough arguments" << argc << endl;
         return 1;
     }
 
     memory = new Memory();
+    code = new Code(memory);
 
     yyin = fopen(argv[1], "r");
     try
@@ -143,5 +144,10 @@ int main(int argc, char* argv[])
     {
         yyerror(error);
     }
+
+    ofstream output;
+    output.open(argv[2]);
+    output << code->get_code();
+    output.close();
     return 0;
 }
