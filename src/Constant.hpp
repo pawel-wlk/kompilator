@@ -13,4 +13,5 @@ struct Constant: public Value
   long long value;
 
   string construct();
+  bool is_constant();
 };

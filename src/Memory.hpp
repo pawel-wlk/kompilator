@@ -18,6 +18,7 @@ public:
   Variable* get_variable(string pid, string index);
   string push_to_stack();
   string pop_from_stack();
+  unsigned int get_stack_top();
 private:
   unsigned int var_count = 0;
   map<string, Variable*> variables; 

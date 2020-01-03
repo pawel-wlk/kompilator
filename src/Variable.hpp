@@ -14,6 +14,7 @@ struct Variable : public Value
   Variable(unsigned int address, unsigned int start, unsigned int end);
   Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency);
 
+  bool is_constant();
   string construct();
   string store();
 };

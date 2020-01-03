@@ -22,6 +22,11 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end, u
   this->initialized = true;
 }
 
+bool Variable::is_constant()
+{
+  return false;
+}
+
 string Variable::construct()
 {
   if (dependency == 0)
@@ -46,6 +51,7 @@ string Variable::store()
     return "STORE " + to_string(address);
   }
 
+  // TODO add memory reference so we can push current value of 0th cell
   string result = "LOAD " + to_string(dependency);
 
   for (int i=0; i<start; i++)

@@ -1,0 +1,10 @@
+DECLARE
+  a, b, add, sub
+BEGIN
+  READ a;
+  READ b;
+  add ASSIGN a PLUS b;
+  sub ASSIGN a MINUS b;
+  WRITE add;
+  WRITE sub;
+END

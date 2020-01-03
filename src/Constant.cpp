@@ -5,6 +5,11 @@ Constant::Constant(long long value)
   this->value = value;
 }
 
+bool Constant::is_constant()
+{
+  return true;
+}
+
 string Constant::construct()
 {
   string result = "SUB 0 ";

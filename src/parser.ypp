@@ -74,7 +74,7 @@ commands: commands command
         | command
         ;
 
-command: identifier ASSIGN expression SEMICOLON 
+command: identifier ASSIGN expression SEMICOLON          { code->assign($1); } 
        | IF condition THEN commands ELSE commands ENDIF
        | IF condition THEN commands ENDIF
        | WHILE condition DO commands ENDWHILE
@@ -84,12 +84,12 @@ command: identifier ASSIGN expression SEMICOLON
        | WRITE value SEMICOLON                           { code->write($2); }
        ;
 
-expression: value
-          | value PLUS value
-          | value MINUS value
-          | value TIMES value
-          | value DIV value
-          | value MOD value
+expression: value               { code->construct_val($1); }
+          | value PLUS value    { code->add($1, $3); }
+          | value MINUS value   { code->subtract($1, $3); }
+          | value TIMES value   { code->multiply($1, $3); }
+          | value DIV value     { code->divide($1, $3); }
+          | value MOD value     { code->modulo($1, $3); }
           ;
 
 condition: value EQ value

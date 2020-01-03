@@ -83,3 +83,8 @@ string Memory::pop_from_stack()
 {
   return "LOAD " + to_string(this->var_count--);
 }
+
+unsigned int Memory::get_stack_top()
+{
+  return this->var_count;
+}
