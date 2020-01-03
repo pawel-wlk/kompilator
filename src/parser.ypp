@@ -119,7 +119,10 @@ identifier: PID                   {
 
 int yyerror(string s)
 {
-    cout << "Error in line " << yylineno << ": " << s << endl;
+    cout << "\033[1;31m" 
+         << "Error in line " << yylineno << ": " 
+         << "\033[0m"
+         << s << endl;
     return 0;
 }
 
@@ -139,15 +142,15 @@ int main(int argc, char* argv[])
     try
     {
         yyparse();
+        ofstream output;
+        output.open(argv[2]);
+        output << code->get_code();
+        output.close();
     }
     catch (string error)
     {
         yyerror(error);
     }
 
-    ofstream output;
-    output.open(argv[2]);
-    output << code->get_code();
-    output.close();
     return 0;
 }

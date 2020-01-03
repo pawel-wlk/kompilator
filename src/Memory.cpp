@@ -2,11 +2,23 @@
 
 void Memory::reserve_variable(string pid)
 {
+  if (this->variables.find(pid) != this->variables.end())
+  {
+    throw (string) pid + " is already defined";
+  }
   this->variables[pid] = new Variable(++this->var_count);
 }
 
 void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
 {
+  if (this->variables.find(pid) != this->variables.end())
+  {
+    throw (string) pid + " is already defined";
+  }
+  if (start >= end)
+  {
+    throw (string) "Wrong range of array " + pid;
+  }
   this->variables[pid] = new Variable(this->var_count+1, start, end);
   auto length = end - start + 1;
   this->var_count += length;
