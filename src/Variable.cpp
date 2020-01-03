@@ -10,6 +10,7 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end)
   this->address = address;
   this->start = start;
   this->end = end;
+  this->initialized = true;
 }
 
 Variable::Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency)
@@ -18,6 +19,7 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end, u
   this->start = start;
   this->end = end;
   this->dependency = dependency;
+  this->initialized = true;
 }
 
 string Variable::construct()
@@ -29,7 +31,7 @@ string Variable::construct()
 
   string result = "LOAD " + to_string(dependency);
 
-  for (int i=0; i<start; i++)
+  for (int i=0; i<start-1; i++)
     result += " DEC";
   
   result += " LOADI 0";

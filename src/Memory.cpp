@@ -1,5 +1,7 @@
 #include "Memory.hpp"
 
+#include<iostream>
+
 void Memory::reserve_variable(string pid)
 {
   if (this->variables.find(pid) != this->variables.end())
@@ -30,7 +32,12 @@ Variable* Memory::get_variable(string pid)
   {
     throw (string) pid + " is not defined";
   }
-  return this->variables[pid];
+  auto var = this->variables[pid];
+  // if (!var->initialized)
+  // {
+  //   throw (string) pid + " is not initialized";
+  // }
+  return var;
 }
 
 Variable* Memory::get_variable(string pid, unsigned int index)

@@ -1,0 +1,11 @@
+
+DECLARE
+  test(2:3), i
+BEGIN
+  READ test(2);
+  READ test(3);
+  WRITE test(2);
+  WRITE test(3);
+  READ i;
+  WRITE test(i);
+END
