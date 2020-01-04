@@ -14,6 +14,7 @@ class Code
 private:
   Memory* memory;
   string code;
+  unsigned int counter;
 public:
   Code(Memory* memory);
   string get_code();

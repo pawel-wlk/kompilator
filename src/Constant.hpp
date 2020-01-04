@@ -12,6 +12,6 @@ struct Constant: public Value
 
   long long value;
 
-  string construct();
+  string construct(unsigned int* counter);
   bool is_constant();
 };
