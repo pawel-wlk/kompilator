@@ -31,7 +31,7 @@ string Variable::construct(unsigned int* counter)
 {
   if (dependency == 0)
   {
-    *counter++;
+    (*counter)++;
     return "LOAD " + to_string(address);
   }
 
@@ -51,7 +51,7 @@ string Variable::store(unsigned int* counter)
 {
   if (dependency == 0)
   {
-    *counter++;
+    (*counter)++;
     return "STORE " + to_string(address);
   }
 
