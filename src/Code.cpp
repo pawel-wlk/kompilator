@@ -107,8 +107,6 @@ void Code::multiply(Value* a, Value* b)
 
   counter += 7;
 
-  code += "\n# counter :" +to_string(counter) +"\n";
-
   auto one = memory->get_stack_top();
   code += b->construct(&counter) + " ";
   code += memory->push_to_stack() + " ";
@@ -118,7 +116,12 @@ void Code::multiply(Value* a, Value* b)
   auto a_addr = memory->get_stack_top();
 
   counter += 2;
-  code += "\n# counter :" +to_string(counter) +"\n";
+
+
+  code += "JPOS " + to_string(counter+7);
+  code += "SUB 0 SUB " + to_string(b_addr) + "STORE " + to_string(b_addr) + " ";
+  code += "SUB 0 SUB " + to_string(a_addr) + "STORE " + to_string(a_addr) + " ";
+  counter += 7;
 
   auto start_counter = counter;
   code += "LOAD " + to_string(a_addr) + " SHIFT " + to_string(neg_one) + " SHIFT " + to_string(one) + " SUB " + to_string(a_addr) + " ";
@@ -138,7 +141,6 @@ void Code::multiply(Value* a, Value* b)
   code += "LOAD " + to_string(result) + " ";
 
   counter += 3;
-  code += "\n# counter :" +to_string(counter) +"\n";
 
   memory->pop_from_stack();
   memory->pop_from_stack();
