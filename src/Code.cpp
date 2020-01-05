@@ -138,7 +138,7 @@ void Code::multiply(Value* a, Value* b)
   code += "JZERO " + to_string(counter+2) + " ";
   code += "JUMP " + to_string(start_counter) + " ";
 
-  code += "LOAD " + to_string(result) + " ";
+  code += "LOAD " + to_string(result) + "\n";
 
   counter += 3;
 
@@ -165,7 +165,66 @@ void Code::divide(Value* a, Value* b)
     return;
   }
 
-  // TODO figure out division
+  code += "SUB 0 ";
+  code += memory->push_to_stack() + " ";
+  auto result = memory->get_stack_top();
+  code += "INC ";
+  code += memory->push_to_stack();
+  auto multiple = memory->get_stack_top();
+  code += memory->push_to_stack();
+  auto one = memory->get_stack_top();
+  code += "DEC DEC ";
+  code += memory->push_to_stack();
+  auto neg_one = memory->get_stack_top();
+  code += a->construct(&counter) + " ";
+  code += memory->push_to_stack() + " ";
+  auto dividend = memory->get_stack_top();
+  code += b->construct(&counter) + " ";
+  code += memory->push_to_stack() + " ";
+  auto divisor = memory->get_stack_top();
+
+  counter += 10;
+
+  auto start_counter = counter;
+
+  code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(one) + " STORE " + to_string(multiple) + " ";
+  code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(one) + " STORE " + to_string(divisor) + " ";
+
+  code += "SUB " + to_string(dividend) + " ";
+  counter += 7;
+
+  code += "JNEG " + to_string(counter + 2);
+
+  code += "JUMP " + to_string(start_counter) + " ";
+  counter += 2;
+
+  start_counter = counter;
+
+  code += "LOAD " + to_string(dividend) + "SUB " + to_string(divisor);
+  counter += 2;
+  code += "JPOS " + to_string(counter+5) + " ";
+  code += "STORE " + to_string(dividend) + " ";
+  code += "LOAD " + to_string(result) + " ADD " + to_string(multiple) + " STORE " + to_string(result) + " ";
+  counter += 5;
+
+
+  code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(divisor) + " ";
+  code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(multiple) + " ";
+  counter += 6;
+  
+  code += "JZERO " + to_string(counter+2);
+  code += "JUMP " + to_string(start_counter) + " ";
+
+  code += "LOAD " + to_string(result) + "\n";
+
+  counter += 3;
+
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
 }
 
 void Code::modulo(Value* a, Value* b)
