@@ -8,6 +8,5 @@ using namespace std;
 class Value
 {
 public:
-  virtual string construct(unsigned int* counter) = 0;
   virtual bool is_constant() = 0;
 };

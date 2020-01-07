@@ -3,7 +3,7 @@ all: bin kompilator
 bin:
 	mkdir -p bin
 
-kompilator: bin/parser.o bin/lexer.o bin/Memory.o bin/Variable.o bin/Constant.o bin/Code.o
+kompilator: bin/parser.o bin/lexer.o bin/Memory.o bin/Variable.o bin/Constant.o bin/Code.o bin/Operation.o
 	g++ -o $@ $^
 
 bin/parser.o: bin/parser.tab.cpp
@@ -29,6 +29,10 @@ bin/Constant.o: src/Constant.cpp
 
 bin/Code.o: src/Code.cpp
 	g++ -c $^ -o $@
+
+bin/Operation.o: src/Operation.cpp
+	g++ -c $^ -o $@
+
 
 cleanall: clean
 	rm -f kompilator

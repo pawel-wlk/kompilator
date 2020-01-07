@@ -16,8 +16,8 @@ public:
   Variable* get_variable(string pid);
   Variable* get_variable(string pid, unsigned int index);
   Variable* get_variable(string pid, string index);
-  string push_to_stack();
-  string pop_from_stack();
+  unsigned int push_to_stack();
+  unsigned int pop_from_stack();
   unsigned int get_stack_top();
 private:
   unsigned int var_count = 0;

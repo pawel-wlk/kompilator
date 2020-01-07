@@ -9,38 +9,79 @@ Code::Code(Memory* memory)
 
 string Code::get_code()
 {
-  return this->code + "HALT";
+  string result;
+  for (auto op = operations.begin(); op != operations.end(); op++)
+  {
+    result += op->stringify() + "\n";
+  }
+
+  return result + "HALT";
+}
+
+void Code::store(Variable* var)
+{
+  if (var->dependency == 0)
+  {
+    operations.emplace_back(STORE, var->address);
+    return;
+  }
+
+  // TODO store dependent vaiiables
+  operations.emplace_back(STORE, memory->push_to_stack());
+  operations.emplace_back(LOAD, var->dependency);
 }
 
 void Code::read(Variable* var)
 {
-  this->code += this->memory->push_to_stack();
-  this->code += " GET " + var->store(&counter) + " " ;
-  this->code += this->memory->pop_from_stack() + "\n";
-  counter += 3;
-  code += "\n# counter :" +to_string(counter) +"\n";
+  operations.emplace_back(GET);
+  store(var);
 }
 
 void Code::write(Value* val)
 {
-  this->code += this->memory->push_to_stack();
-  this->code += " " + val->construct(&counter) + " PUT ";
-  this->code += this->memory->pop_from_stack() + "\n";
-  counter += 3;
+  construct_val(val);
+  operations.emplace_back(PUT);
 }
 
 void Code::assign(Variable* var)
 {
-  code += var->store(&counter) + " ";
-  code += memory->pop_from_stack() + "\n";
-  counter++;
+  store(var);
 }
 
 void Code::construct_val(Value* val)
 {
-  this->code += memory->push_to_stack();
-  this->code += val->construct(&counter);
-  counter++;
+  if (val->is_constant())
+  {
+    Constant c = *(Constant*) val;
+
+    bool is_negative = c.value < 0;
+
+    for (int i=0; i<abs(c.value); i++)
+    {
+      operations.emplace_back(is_negative ? DEC : INC);
+    }
+    return;
+  }
+
+  Variable var = *(Variable*) val;
+
+  if (var.dependency == 0)
+  {
+    operations.emplace_back(LOAD, var.address);
+    return;
+  }
+
+  Constant start(var.start);
+  construct_val(&start);
+  auto start_addr = memory->push_to_stack();
+
+  operations.emplace_back(STORE, start_addr);
+  operations.emplace_back(LOAD, var.dependency);
+  operations.emplace_back(SUB, start_addr);
+
+  operations.emplace_back(LOADI, 0);
+
+  memory->pop_from_stack();
 }
 
 void Code::add(Value* a, Value* b)
@@ -54,14 +95,15 @@ void Code::add(Value* a, Value* b)
     return;
   }
 
-  code += b->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  code += a->construct(&counter) + " ";
-  auto b_addr = memory->get_stack_top();
-  code += "ADD " + to_string(b_addr) + "\n";
-  memory->pop_from_stack();
+  if (a->is_constant())
+  {
+    construct_val(a);
+    operations.emplace_back(ADD, ((Variable*) b)->address);
+    return;
+  }
 
-  counter += 2;
+  construct_val(b);
+  operations.emplace_back(ADD, ((Variable*) a)->address);
 }
 
 void Code::subtract(Value* a, Value* b)
@@ -75,14 +117,9 @@ void Code::subtract(Value* a, Value* b)
     return;
   }
 
-  code += b->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  code += a->construct(&counter) + " ";
-  auto b_addr = memory->get_stack_top();
-  code += "SUB " + to_string(b_addr) + "\n";
-  memory->pop_from_stack();
-
-  counter += 2;
+  construct_val(a);
+  operations.emplace_back(SUB, ((Variable*) b)->address);
+  return;
 }
 
 void Code::multiply(Value* a, Value* b)
@@ -96,57 +133,57 @@ void Code::multiply(Value* a, Value* b)
     return;
   }
 
-  code += "SUB 0 ";
-  code += memory->push_to_stack() + " ";
-  auto result = memory->get_stack_top();
-  code += "DEC ";
-  code += memory->push_to_stack();
-  auto neg_one = memory->get_stack_top();
-  code += "INC INC ";
-  code += memory->push_to_stack();
+  // code += "SUB 0 ";
+  // code += memory->push_to_stack() + " ";
+  // auto result = memory->get_stack_top();
+  // code += "DEC ";
+  // code += memory->push_to_stack();
+  // auto neg_one = memory->get_stack_top();
+  // code += "INC INC ";
+  // code += memory->push_to_stack();
 
-  counter += 7;
+  // counter += 7;
 
-  auto one = memory->get_stack_top();
-  code += b->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  auto b_addr = memory->get_stack_top();
-  code += a->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  auto a_addr = memory->get_stack_top();
+  // auto one = memory->get_stack_top();
+  // code += b->construct(&counter) + " ";
+  // code += memory->push_to_stack() + " ";
+  // auto b_addr = memory->get_stack_top();
+  // code += a->construct(&counter) + " ";
+  // code += memory->push_to_stack() + " ";
+  // auto a_addr = memory->get_stack_top();
 
-  counter += 2;
+  // counter += 2;
 
 
-  code += "JPOS " + to_string(counter+7);
-  code += "SUB 0 SUB " + to_string(b_addr) + "STORE " + to_string(b_addr) + " ";
-  code += "SUB 0 SUB " + to_string(a_addr) + "STORE " + to_string(a_addr) + " ";
-  counter += 7;
+  // code += "JPOS " + to_string(counter+7);
+  // code += "SUB 0 SUB " + to_string(b_addr) + "STORE " + to_string(b_addr) + " ";
+  // code += "SUB 0 SUB " + to_string(a_addr) + "STORE " + to_string(a_addr) + " ";
+  // counter += 7;
 
-  auto start_counter = counter;
-  code += "LOAD " + to_string(a_addr) + " SHIFT " + to_string(neg_one) + " SHIFT " + to_string(one) + " SUB " + to_string(a_addr) + " ";
-  counter += 4;
-  code += "JZERO " + to_string(counter + 4) + " ";
-  code += "LOAD " + to_string(result) + "ADD " + to_string(b_addr) + " STORE " + to_string(result) + " ";
-  counter += 4;
+  // auto start_counter = counter;
+  // code += "LOAD " + to_string(a_addr) + " SHIFT " + to_string(neg_one) + " SHIFT " + to_string(one) + " SUB " + to_string(a_addr) + " ";
+  // counter += 4;
+  // code += "JZERO " + to_string(counter + 4) + " ";
+  // code += "LOAD " + to_string(result) + "ADD " + to_string(b_addr) + " STORE " + to_string(result) + " ";
+  // counter += 4;
   
-  code += "LOAD " + to_string(b_addr) + " SHIFT " + to_string(one) + " STORE " + to_string(b_addr) + " ";
-  counter += 3;
-  code += "LOAD " + to_string(a_addr) + " SHIFT " + to_string(neg_one) + " " + " STORE " + to_string(a_addr) + " ";
-  counter += 3;
+  // code += "LOAD " + to_string(b_addr) + " SHIFT " + to_string(one) + " STORE " + to_string(b_addr) + " ";
+  // counter += 3;
+  // code += "LOAD " + to_string(a_addr) + " SHIFT " + to_string(neg_one) + " " + " STORE " + to_string(a_addr) + " ";
+  // counter += 3;
   
-  code += "JZERO " + to_string(counter+2) + " ";
-  code += "JUMP " + to_string(start_counter) + " ";
+  // code += "JZERO " + to_string(counter+2) + " ";
+  // code += "JUMP " + to_string(start_counter) + " ";
 
-  code += "LOAD " + to_string(result) + "\n";
+  // code += "LOAD " + to_string(result) + "\n";
 
-  counter += 3;
+  // counter += 3;
 
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
 }
 
 void Code::divide(Value* a, Value* b)
@@ -165,66 +202,66 @@ void Code::divide(Value* a, Value* b)
     return;
   }
 
-  code += "SUB 0 ";
-  code += memory->push_to_stack() + " ";
-  auto result = memory->get_stack_top();
-  code += "INC ";
-  code += memory->push_to_stack();
-  auto multiple = memory->get_stack_top();
-  code += memory->push_to_stack();
-  auto one = memory->get_stack_top();
-  code += "DEC DEC ";
-  code += memory->push_to_stack();
-  auto neg_one = memory->get_stack_top();
-  code += a->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  auto dividend = memory->get_stack_top();
-  code += b->construct(&counter) + " ";
-  code += memory->push_to_stack() + " ";
-  auto divisor = memory->get_stack_top();
+  // code += "SUB 0 ";
+  // code += memory->push_to_stack() + " ";
+  // auto result = memory->get_stack_top();
+  // code += "INC ";
+  // code += memory->push_to_stack();
+  // auto multiple = memory->get_stack_top();
+  // code += memory->push_to_stack();
+  // auto one = memory->get_stack_top();
+  // code += "DEC DEC ";
+  // code += memory->push_to_stack();
+  // auto neg_one = memory->get_stack_top();
+  // code += a->construct(&counter) + " ";
+  // code += memory->push_to_stack() + " ";
+  // auto dividend = memory->get_stack_top();
+  // code += b->construct(&counter) + " ";
+  // code += memory->push_to_stack() + " ";
+  // auto divisor = memory->get_stack_top();
 
-  counter += 10;
+  // counter += 10;
 
-  auto start_counter = counter;
+  // auto start_counter = counter;
 
-  code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(one) + " STORE " + to_string(multiple) + " ";
-  code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(one) + " STORE " + to_string(divisor) + " ";
+  // code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(one) + " STORE " + to_string(multiple) + " ";
+  // code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(one) + " STORE " + to_string(divisor) + " ";
 
-  code += "SUB " + to_string(dividend) + " ";
-  counter += 7;
+  // code += "SUB " + to_string(dividend) + " ";
+  // counter += 7;
 
-  code += "JNEG " + to_string(counter + 2);
+  // code += "JNEG " + to_string(counter + 2);
 
-  code += "JUMP " + to_string(start_counter) + " ";
-  counter += 2;
+  // code += "JUMP " + to_string(start_counter) + " ";
+  // counter += 2;
 
-  start_counter = counter;
+  // start_counter = counter;
 
-  code += "LOAD " + to_string(dividend) + "SUB " + to_string(divisor);
-  counter += 2;
-  code += "JNEG " + to_string(counter+5) + " ";
-  code += "STORE " + to_string(dividend) + " ";
-  code += "LOAD " + to_string(result) + " ADD " + to_string(multiple) + " STORE " + to_string(result) + " ";
-  counter += 5;
+  // code += "LOAD " + to_string(dividend) + "SUB " + to_string(divisor);
+  // counter += 2;
+  // code += "JNEG " + to_string(counter+5) + " ";
+  // code += "STORE " + to_string(dividend) + " ";
+  // code += "LOAD " + to_string(result) + " ADD " + to_string(multiple) + " STORE " + to_string(result) + " ";
+  // counter += 5;
 
 
-  code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(divisor) + " ";
-  code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(multiple) + " ";
-  counter += 6;
+  // code += "LOAD " + to_string(divisor) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(divisor) + " ";
+  // code += "LOAD " + to_string(multiple) + " SHIFT " + to_string(neg_one) + " STORE " + to_string(multiple) + " ";
+  // counter += 6;
   
-  code += "JZERO " + to_string(counter+2);
-  code += "JUMP " + to_string(start_counter) + " ";
+  // code += "JZERO " + to_string(counter+2);
+  // code += "JUMP " + to_string(start_counter) + " ";
 
-  code += "LOAD " + to_string(result) + "\n";
+  // code += "LOAD " + to_string(result) + "\n";
 
-  counter += 3;
+  // counter += 3;
 
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
+  // memory->pop_from_stack();
 }
 
 void Code::modulo(Value* a, Value* b)

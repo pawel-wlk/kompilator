@@ -74,14 +74,14 @@ Variable* Memory::get_variable(string pid, string index)
   return new Variable(var->address, var->start, var->end, dependency->address);
 }
 
-string Memory::push_to_stack()
+unsigned int Memory::push_to_stack()
 {
-  return "STORE " + to_string(++this->var_count);
+  return ++this->var_count;
 }
 
-string Memory::pop_from_stack()
+unsigned int Memory::pop_from_stack()
 {
-  return "LOAD " + to_string(this->var_count--);
+  return this->var_count--;
 }
 
 unsigned int Memory::get_stack_top()

@@ -15,6 +15,4 @@ struct Variable : public Value
   Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency);
 
   bool is_constant();
-  string construct(unsigned int* counter);
-  string store(unsigned int* counter);
 };
