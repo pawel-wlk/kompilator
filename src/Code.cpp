@@ -202,7 +202,7 @@ void Code::divide(Value* a, Value* b)
 
   code += "LOAD " + to_string(dividend) + "SUB " + to_string(divisor);
   counter += 2;
-  code += "JPOS " + to_string(counter+5) + " ";
+  code += "JNEG " + to_string(counter+5) + " ";
   code += "STORE " + to_string(dividend) + " ";
   code += "LOAD " + to_string(result) + " ADD " + to_string(multiple) + " STORE " + to_string(result) + " ";
   counter += 5;
