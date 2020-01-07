@@ -15,10 +15,9 @@ class Code
 {
 private:
   Memory* memory;
-  string code;
   vector<Operation> operations;
 
-  unsigned int counter;
+  void flip_sign(unsigned int addr);
 public:
   Code(Memory* memory);
   string get_code();
