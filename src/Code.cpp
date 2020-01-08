@@ -133,7 +133,7 @@ void Code::subtract(Value* a, Value* b)
   construct_val(b);
   operations.emplace_back(STORE, memory->push_to_stack());
   construct_val(a);
-  operations.emplace_back(ADD, memory->pop_from_stack());
+  operations.emplace_back(SUB, memory->pop_from_stack());
 }
 
 
