@@ -25,8 +25,26 @@ void Code::store(Variable* var)
     return;
   }
 
-  // TODO store dependent vaiiables
-  operations.emplace_back(STORE, memory->push_to_stack());
+  auto stored_val = memory->push_to_stack();
+  auto tmp = memory->push_to_stack();
+
+  operations.emplace_back(STORE, stored_val);
+
+  Constant start(var->start);
+  construct_val(&start);
+
+  operations.emplace_back(STORE, tmp);
+  operations.emplace_back(LOAD, var->dependency);
+  operations.emplace_back(SUB, tmp);
+  operations.emplace_back(STORE, tmp);
+
+  operations.emplace_back(LOAD, stored_val);
+  operations.emplace_back(STOREI, tmp);
+
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+
+
   operations.emplace_back(LOAD, var->dependency);
 }
 
@@ -64,7 +82,7 @@ void Code::construct_val(Value* val)
 
   Variable var = *(Variable*) val;
 
-  if (var.dependency == 0)
+  if (!var.is_dependent())
   {
     operations.emplace_back(LOAD, var.address);
     return;
