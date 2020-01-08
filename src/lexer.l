@@ -5,6 +5,7 @@
 #include "../src/Variable.hpp"
 #include "../src/Constant.hpp"
 #include "../src/Value.hpp"
+#include "../src/labels.hpp"
 #include "parser.tab.hpp"
 
 #include <string>

@@ -248,3 +248,97 @@ void Code::modulo(Value* a, Value* b)
 
   // TODO figure out modulo
 }
+
+ConditionLabel* Code::equal(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JZERO, operations.size()+2);
+  operations.emplace_back(JUMP, 0); // replace later with address of block's end
+
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+ConditionLabel* Code::not_equal(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JZERO, 0); // replace later with address of block's end
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+ConditionLabel* Code::less(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JPOS, 0); // replace later with address of block's end
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+ConditionLabel* Code::greater(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JNEG, 0); // replace later with address of block's end
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+ConditionLabel* Code::less_or_equal(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JNEG, operations.size()+2);
+  operations.emplace_back(JUMP, 0); // replace later with address of block's end
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+ConditionLabel* Code::greater_or_equal(Value* a, Value* b)
+{
+  auto start_addr = operations.size();
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  construct_val(b);
+  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  operations.emplace_back(JPOS, operations.size()+2);
+  operations.emplace_back(JUMP, 0); // replace later with address of block's end
+
+  return new ConditionLabel(start_addr, operations.size()-1);
+}
+
+
+void Code::single_if(ConditionLabel* condition)
+{
+  operations[condition->jump].argument = operations.size();
+}
+
+void Code::while_loop(ConditionLabel* condition)
+{
+  operations.emplace_back(JUMP, condition->start);
+  operations[condition->jump].argument = operations.size();
+}

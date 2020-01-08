@@ -8,6 +8,7 @@
 #include "Value.hpp"
 #include "Memory.hpp"
 #include "Operation.hpp"
+#include "labels.hpp"
 
 using namespace std;
 
@@ -32,4 +33,14 @@ public:
   void multiply(Value* a, Value* b);
   void divide(Value* a, Value* b);
   void modulo(Value* a, Value* b);
+
+  ConditionLabel* equal(Value* a, Value* b);
+  ConditionLabel* not_equal(Value* a, Value* b);
+  ConditionLabel* less(Value* a, Value* b);
+  ConditionLabel* greater(Value* a, Value* b);
+  ConditionLabel* less_or_equal(Value* a, Value* b);
+  ConditionLabel* greater_or_equal(Value* a, Value* b);
+
+  void single_if(ConditionLabel* condition);
+  void while_loop(ConditionLabel* condition);
 };
