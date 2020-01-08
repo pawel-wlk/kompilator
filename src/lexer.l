@@ -60,7 +60,7 @@ int yylex();
 "("                     { return LPAREN; }
 ")"                     { return RPAREN; }
 [_a-z]+                 { yylval.pid = new string(yytext); return PID; }
-[0-9]+                  { yylval.num = std::stoll(yytext); return NUM; }
+-?[0-9]+                  { yylval.num = std::stoll(yytext); return NUM; }
 \[.*\]                  
 "["                     { BEGIN(COMMENT); }
 <COMMENT>{
