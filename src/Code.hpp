@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <vector>
+#include <iostream>
 
 #include "Constant.hpp"
 #include "Variable.hpp"
@@ -20,7 +20,8 @@ private:
   void flip_sign(unsigned int addr);
 public:
   Code(Memory* memory);
-  string get_code();
+  friend ostream& operator<<(ostream& os, Code& c);
+
   void store(Variable* var);
   void read(Variable* var);
   void write(Value* val);

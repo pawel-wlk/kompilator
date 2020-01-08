@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
         yyparse();
         ofstream output;
         output.open(argv[2]);
-        output << code->get_code();
+        output << *code;
         output.close();
     }
     catch (string error)

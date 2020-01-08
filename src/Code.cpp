@@ -5,15 +5,16 @@ Code::Code(Memory* memory)
   this->memory = memory;
 }
 
-string Code::get_code()
+ostream& operator<<(ostream& os, Code& c)
 {
-  string result;
-  for (auto op = operations.begin(); op != operations.end(); op++)
+  for (auto op = c.operations.begin(); op != c.operations.end(); op++)
   {
-    result += op->stringify() + "\n";
+    os << op->stringify() << endl;
   }
 
-  return result + "HALT";
+  os << "HALT";
+
+  return os;
 }
 
 void Code::store(Variable* var)
@@ -82,6 +83,7 @@ void Code::construct_val(Value* val)
   memory->pop_from_stack();
 }
 
+// TODO fix dependent variables in arithmetics
 void Code::add(Value* a, Value* b)
 {
   if (a->is_constant() && b->is_constant())
