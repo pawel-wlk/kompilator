@@ -71,6 +71,8 @@ void Code::construct_val(Value* val)
   {
     Constant c = *(Constant*) val;
 
+    operations.emplace_back(SUB, 0);
+
     bool is_negative = c.value < 0;
 
     for (int i=0; i<abs(c.value); i++)
@@ -277,7 +279,7 @@ ConditionLabel* Code::not_equal(Value* a, Value* b)
   return new ConditionLabel(start_addr, operations.size()-1);
 }
 
-ConditionLabel* Code::less(Value* a, Value* b)
+ConditionLabel* Code::greater_or_equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
   construct_val(a);
@@ -290,7 +292,7 @@ ConditionLabel* Code::less(Value* a, Value* b)
   return new ConditionLabel(start_addr, operations.size()-1);
 }
 
-ConditionLabel* Code::greater(Value* a, Value* b)
+ConditionLabel* Code::less_or_equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
   construct_val(a);
@@ -303,7 +305,7 @@ ConditionLabel* Code::greater(Value* a, Value* b)
   return new ConditionLabel(start_addr, operations.size()-1);
 }
 
-ConditionLabel* Code::less_or_equal(Value* a, Value* b)
+ConditionLabel* Code::greater(Value* a, Value* b)
 {
   auto start_addr = operations.size();
   construct_val(a);
@@ -317,7 +319,7 @@ ConditionLabel* Code::less_or_equal(Value* a, Value* b)
   return new ConditionLabel(start_addr, operations.size()-1);
 }
 
-ConditionLabel* Code::greater_or_equal(Value* a, Value* b)
+ConditionLabel* Code::less(Value* a, Value* b)
 {
   auto start_addr = operations.size();
   construct_val(a);
