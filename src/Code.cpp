@@ -95,15 +95,10 @@ void Code::add(Value* a, Value* b)
     return;
   }
 
-  if (a->is_constant())
-  {
-    construct_val(a);
-    operations.emplace_back(ADD, ((Variable*) b)->address);
-    return;
-  }
-
+  construct_val(a);
+  operations.emplace_back(STORE, memory->push_to_stack());
   construct_val(b);
-  operations.emplace_back(ADD, ((Variable*) a)->address);
+  operations.emplace_back(ADD, memory->pop_from_stack());
 }
 
 void Code::subtract(Value* a, Value* b)
@@ -117,9 +112,10 @@ void Code::subtract(Value* a, Value* b)
     return;
   }
 
+  construct_val(b);
+  operations.emplace_back(STORE, memory->push_to_stack());
   construct_val(a);
-  operations.emplace_back(SUB, ((Variable*) b)->address);
-  return;
+  operations.emplace_back(ADD, memory->pop_from_stack());
 }
 
 

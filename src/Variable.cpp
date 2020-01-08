@@ -26,3 +26,8 @@ bool Variable::is_constant()
 {
   return false;
 }
+
+bool Variable::is_dependent()
+{
+  return dependency != 0;
+}

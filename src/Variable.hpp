@@ -15,4 +15,5 @@ struct Variable : public Value
   Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency);
 
   bool is_constant();
+  bool is_dependent();
 };
