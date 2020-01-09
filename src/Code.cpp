@@ -337,12 +337,16 @@ ConditionLabel* Code::less(Value* a, Value* b)
 void Code::single_if(ConditionLabel* condition)
 {
   operations[condition->jump].argument = operations.size();
+
+  delete condition;
 }
 
 void Code::while_loop(ConditionLabel* condition)
 {
   operations.emplace_back(JUMP, condition->start);
   operations[condition->jump].argument = operations.size();
+
+  delete condition;
 }
 
 IfLabel* Code::if_else_first(ConditionLabel* condition)
@@ -356,6 +360,8 @@ IfLabel* Code::if_else_first(ConditionLabel* condition)
 void Code::if_else_second(IfLabel* if_lbl)
 {
   operations[if_lbl->else_jump].argument = operations.size();
+
+  delete if_lbl;
 }
 
 DoWhileLabel* Code::do_loop_first()
@@ -365,8 +371,10 @@ DoWhileLabel* Code::do_loop_first()
 
 void Code::do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition)
 {
-  operations[condition->jump].argument = operations.size() + 2;
+  operations[condition->jump].argument = operations.size() + 1;
 
   operations.emplace_back(JUMP, do_lbl->loop_start);
 
+  delete do_lbl;
+  delete condition;
 }
