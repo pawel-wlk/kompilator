@@ -43,4 +43,10 @@ public:
 
   void single_if(ConditionLabel* condition);
   void while_loop(ConditionLabel* condition);
+
+  IfLabel* if_else_first(ConditionLabel* condition);
+  void if_else_second(IfLabel* if_lbl);
+
+  DoWhileLabel* do_loop_first();
+  void do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition);
 };

@@ -1,0 +1,8 @@
+BEGIN
+  IF 3 EQ 4
+  THEN
+    WRITE 1;
+  ELSE
+    WRITE 0;
+  ENDIF
+END

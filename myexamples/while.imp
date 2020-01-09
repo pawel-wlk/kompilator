@@ -1,0 +1,11 @@
+DECLARE
+  i
+BEGIN
+  i ASSIGN 3;
+
+  WHILE i GEQ 0
+  DO
+    WRITE i;
+    i ASSIGN i MINUS 1;
+  ENDWHILE
+END

@@ -344,3 +344,29 @@ void Code::while_loop(ConditionLabel* condition)
   operations.emplace_back(JUMP, condition->start);
   operations[condition->jump].argument = operations.size();
 }
+
+IfLabel* Code::if_else_first(ConditionLabel* condition)
+{
+  operations.emplace_back(JUMP, 0);
+  operations[condition->jump].argument = operations.size();
+
+  return new IfLabel(operations.size() - 1);
+}
+
+void Code::if_else_second(IfLabel* if_lbl)
+{
+  operations[if_lbl->else_jump].argument = operations.size();
+}
+
+DoWhileLabel* Code::do_loop_first()
+{
+  return new DoWhileLabel(operations.size());
+}
+
+void Code::do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition)
+{
+  operations[condition->jump].argument = operations.size() + 2;
+
+  operations.emplace_back(JUMP, do_lbl->loop_start);
+
+}

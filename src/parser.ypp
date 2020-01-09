@@ -30,12 +30,16 @@ Memory* memory;
     Variable* var;
     Value* val;
     ConditionLabel* cond_lbl;
+    IfLabel* if_lbl;
+    DoWhileLabel* do_lbl;
 }
 
 %start program
 
 %token DECLARE T_BEGIN END
-%token IF WHILE DO
+%token <if_lbl> IF
+%token WHILE
+%token <do_lbl> DO
 %token FOR 
 %token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
 %token READ WRITE       
@@ -78,10 +82,12 @@ commands: commands command
         ;
 
 command: identifier ASSIGN expression SEMICOLON          { code->assign($1); } 
-       | IF condition THEN commands ELSE commands ENDIF
+       | IF condition THEN commands                      { $1 = code->if_else_first($2); }
+         ELSE commands ENDIF                             { code->if_else_second($1); }
        | IF condition THEN commands ENDIF                { code->single_if($2); }
        | WHILE condition DO commands ENDWHILE            { code->while_loop($2); }
-       | DO commands WHILE condition ENDDO               
+       | DO                                              { $1 = code->do_loop_first(); }
+         commands WHILE condition ENDDO                  { code->do_loop_second($1, $5); }
        | FOR PID FROM value TO value DO commands ENDFOR
        | READ identifier SEMICOLON                       { code->read($2); }
        | WRITE value SEMICOLON                           { code->write($2); }
