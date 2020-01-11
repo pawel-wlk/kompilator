@@ -1,0 +1,8 @@
+
+BEGIN
+  FOR i FROM 1 DOWNTO 10
+  DO
+    WRITE i;
+  ENDFOR
+
+END

@@ -49,4 +49,7 @@ public:
 
   DoWhileLabel* do_loop_first();
   void do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition);
+
+  ForLabel* for_loop_first(string iterator, Value* start, Value* end, bool ascending);
+  void for_loop_second(ForLabel* loop, bool ascending);
 };

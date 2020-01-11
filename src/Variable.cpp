@@ -1,20 +1,24 @@
 #include "Variable.hpp"
 
-Variable::Variable(unsigned int address)
+Variable::Variable(string name, unsigned int address)
 {
   this->address = address;
+  this->is_array = false;
+  this->name = name;
 }
 
-Variable::Variable(unsigned int address, unsigned int start, unsigned int end)
+Variable::Variable(string name, unsigned int address, unsigned int start, unsigned int end)
 {
   this->address = address;
   this->start = start;
   this->end = end;
   this->initialized = true;
   this->is_array = true;
+  this->is_iterator = false;
+  this->name = name;
 }
 
-Variable::Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency)
+Variable::Variable(string name, unsigned int address, unsigned int start, unsigned int end, unsigned int dependency)
 {
   this->address = address;
   this->start = start;
@@ -22,6 +26,8 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end, u
   this->dependency = dependency;
   this->initialized = true;
   this->is_array = true;
+  this->is_iterator = false;
+  this->name = name;
 }
 
 bool Variable::is_constant()

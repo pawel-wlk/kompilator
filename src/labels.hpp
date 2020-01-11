@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Variable.hpp"
+
 struct ConditionLabel
 {
   unsigned long long start;
@@ -20,4 +22,13 @@ struct DoWhileLabel
   unsigned long long loop_start;
 
   DoWhileLabel(unsigned long long loop_start);
+};
+
+struct ForLabel
+{
+  Variable* iterator;
+  ConditionLabel* condition;
+
+  ForLabel(Variable* iterator, ConditionLabel* condition);
+  ~ForLabel();
 };

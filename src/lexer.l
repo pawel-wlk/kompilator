@@ -39,6 +39,7 @@ int yylex();
 "FOR"                   { return FOR; }
 "FROM"                  { return FROM; }
 "TO"                    { return TO; }
+"DOWNTO"                { return DOWNTO; }
 "ENDFOR"                { return ENDFOR; }
 
 "ASSIGN"                { return ASSIGN; }

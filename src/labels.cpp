@@ -16,3 +16,14 @@ DoWhileLabel::DoWhileLabel(unsigned long long loop_start)
 {
   this->loop_start = loop_start;
 }
+
+ForLabel::ForLabel(Variable* iterator, ConditionLabel* condition)
+{
+  this->iterator = iterator;
+  this->condition = condition;
+}
+
+ForLabel::~ForLabel()
+{
+  delete condition;
+}

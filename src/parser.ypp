@@ -32,6 +32,7 @@ Memory* memory;
     ConditionLabel* cond_lbl;
     IfLabel* if_lbl;
     DoWhileLabel* do_lbl;
+    ForLabel* for_lbl;
 }
 
 %start program
@@ -40,7 +41,7 @@ Memory* memory;
 %token <if_lbl> IF
 %token WHILE
 %token <do_lbl> DO
-%token FOR 
+%token <for_lbl> FOR 
 %token THEN ELSE ENDIF FROM TO DOWNTO ENDFOR ENDWHILE ENDDO
 %token READ WRITE       
 %token LE GE LEQ GEQ EQ NEQ
@@ -88,7 +89,10 @@ command: identifier ASSIGN expression SEMICOLON          { code->assign($1); }
        | WHILE condition DO commands ENDWHILE            { code->while_loop($2); }
        | DO                                              { $1 = code->do_loop_first(); }
          commands WHILE condition ENDDO                  { code->do_loop_second($1, $5); }
-       | FOR PID FROM value TO value DO commands ENDFOR
+       | FOR PID FROM value TO value                     { $1 = code->for_loop_first(*$2, $4, $6, true); }
+         DO commands ENDFOR                              { code->for_loop_second($1, true); }
+       | FOR PID FROM value DOWNTO value                 { $1 = code->for_loop_first(*$2, $4, $6, false); }
+         DO commands ENDFOR                              { code->for_loop_second($1, false); }
        | READ identifier SEMICOLON                       { code->read($2); }
        | WRITE value SEMICOLON                           { code->write($2); }
        ;

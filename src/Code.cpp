@@ -378,3 +378,27 @@ void Code::do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition)
   delete do_lbl;
   delete condition;
 }
+
+ForLabel* Code::for_loop_first(string iterator_name, Value* start, Value* end, bool ascending)
+{
+  auto iterator = memory->reserve_iterator(iterator_name);
+  construct_val(start);
+  operations.emplace_back(STORE, iterator->address);
+
+  auto condition = ascending ? less_or_equal(iterator, end) : greater_or_equal(iterator, end);
+
+  return new ForLabel(iterator, condition);
+}
+
+
+void Code::for_loop_second(ForLabel* loop, bool ascending)
+{
+  operations.emplace_back(LOAD, loop->iterator->address);
+  operations.emplace_back(ascending ? INC : DEC);
+  operations.emplace_back(STORE, loop->iterator->address);
+
+  operations.emplace_back(JUMP, loop->condition->start);
+  operations[loop->condition->jump].argument = operations.size();
+
+  memory->destroy_iterator(loop->iterator->name);
+}

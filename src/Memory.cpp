@@ -1,6 +1,6 @@
 #include "Memory.hpp"
 
-#include<iostream>
+#include<sstream>
 
 void Memory::reserve_variable(string pid)
 {
@@ -8,7 +8,7 @@ void Memory::reserve_variable(string pid)
   {
     throw (string) pid + " is already defined";
   }
-  this->variables[pid] = new Variable(++this->var_count);
+  this->variables[pid] = new Variable(pid, ++this->var_count);
 }
 
 void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
@@ -21,9 +21,28 @@ void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
   {
     throw (string) "Wrong range of array " + pid;
   }
-  this->variables[pid] = new Variable(this->var_count+1, start, end);
+  this->variables[pid] = new Variable(pid, this->var_count+1, start, end);
   auto length = end - start + 1;
   this->var_count += length;
+}
+
+Variable* Memory::reserve_iterator(string pid)
+{
+  if (this->variables.find(pid) != this->variables.end())
+  {
+    throw (string) pid + " is already defined";
+  }
+
+  this->variables[pid] = new Variable(pid, ++this->var_count);
+  this->variables[pid]->is_iterator = true;
+
+  return this->variables[pid];
+}
+
+void Memory::destroy_iterator(string pid)
+{
+  variables.erase(pid);
+  var_count--;
 }
 
 Variable* Memory::get_variable(string pid)
@@ -54,7 +73,10 @@ Variable* Memory::get_variable(string pid, unsigned int index)
   }
   auto address = var->address + index - var->start;
 
-  return new Variable(address);
+  stringstream name;
+  name << pid <<"(" << index << ")";
+
+  return new Variable(name.str(), address);
 }
 
 Variable* Memory::get_variable(string pid, string index)
@@ -71,7 +93,10 @@ Variable* Memory::get_variable(string pid, string index)
   }
   auto dependency = this->variables[index];
 
-  return new Variable(var->address, var->start, var->end, dependency->address);
+  stringstream name;
+  name << pid <<"(" << index << ")";
+
+  return new Variable(name.str(), var->address, var->start, var->end, dependency->address);
 }
 
 unsigned int Memory::push_to_stack()
