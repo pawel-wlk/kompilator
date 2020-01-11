@@ -17,7 +17,7 @@ void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
   {
     throw (string) pid + " is already defined";
   }
-  if (start >= end)
+  if (start > end)
   {
     throw (string) "Wrong range of array " + pid;
   }
@@ -48,7 +48,7 @@ Variable* Memory::get_variable(string pid, unsigned int index)
   }
   auto var = this->variables[pid];
 
-  if (var->start == var->end)
+  if (!var->is_array)
   {
     throw (string) pid + " is not an array";
   }
@@ -65,7 +65,7 @@ Variable* Memory::get_variable(string pid, string index)
   }
   auto var = this->variables[pid];
 
-  if (var->start == var->end)
+  if (!var->is_array)
   {
     throw (string) pid + " is not an array";
   }

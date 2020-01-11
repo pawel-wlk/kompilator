@@ -11,6 +11,7 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end)
   this->start = start;
   this->end = end;
   this->initialized = true;
+  this->is_array = true;
 }
 
 Variable::Variable(unsigned int address, unsigned int start, unsigned int end, unsigned int dependency)
@@ -20,6 +21,7 @@ Variable::Variable(unsigned int address, unsigned int start, unsigned int end, u
   this->end = end;
   this->dependency = dependency;
   this->initialized = true;
+  this->is_array = true;
 }
 
 bool Variable::is_constant()

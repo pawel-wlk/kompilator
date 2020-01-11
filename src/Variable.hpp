@@ -9,6 +9,7 @@ struct Variable : public Value
   unsigned int end;
   unsigned int dependency;
   bool initialized;
+  bool is_array;
 
   Variable(unsigned int address);
   Variable(unsigned int address, unsigned int start, unsigned int end);

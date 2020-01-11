@@ -90,13 +90,13 @@ void Code::construct_val(Value* val)
     return;
   }
 
-  Constant start(var.start);
+  Constant start(var.address - var.start);
   construct_val(&start);
   auto start_addr = memory->push_to_stack();
 
   operations.emplace_back(STORE, start_addr);
   operations.emplace_back(LOAD, var.dependency);
-  operations.emplace_back(SUB, start_addr);
+  operations.emplace_back(ADD, start_addr);
 
   operations.emplace_back(LOADI, 0);
 
@@ -187,7 +187,7 @@ void Code::multiply(Value* a, Value* b)
   operations.emplace_back(SHIFT, one);
   operations.emplace_back(SUB, a_addr);
 
-  operations.emplace_back(JZERO, operations.size()+3);
+  operations.emplace_back(JZERO, operations.size()+4);
 
   operations.emplace_back(LOAD, result);
   operations.emplace_back(ADD, b_addr);

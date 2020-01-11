@@ -1,0 +1,10 @@
+DECLARE
+    a(1:1), b(1:1), c(1:1), i, j
+BEGIN
+    i ASSIGN 1;
+    j ASSIGN 1;
+    a(1) ASSIGN 21;
+    b(1) ASSIGN 37;
+    c(1) ASSIGN a(i) TIMES b(j);
+    WRITE c(1);
+END
