@@ -12,7 +12,7 @@ struct Variable : public Value
   unsigned int start;
   unsigned int end;
   unsigned int dependency;
-  bool initialized;
+  bool is_initialized;
   bool is_array;
   bool is_iterator;
   string name;

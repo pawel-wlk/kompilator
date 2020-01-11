@@ -93,6 +93,11 @@ Variable* Memory::get_variable(string pid, string index)
   }
   auto dependency = this->variables[index];
 
+  if (!dependency->is_initialized)
+  {
+    throw (string) (index + " is not initialized");
+  }
+
   stringstream name;
   name << pid <<"(" << index << ")";
 

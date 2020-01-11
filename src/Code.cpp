@@ -19,6 +19,13 @@ ostream& operator<<(ostream& os, Code& c)
 
 void Code::store(Variable* var)
 {
+  if (!var->is_iterator)
+  {
+    throw (string) ("Modification of for loop iterator " +  var->name);
+  }
+
+  var->is_initialized = true;
+
   if (var->dependency == 0)
   {
     operations.emplace_back(STORE, var->address);
@@ -43,9 +50,6 @@ void Code::store(Variable* var)
 
   memory->pop_from_stack();
   memory->pop_from_stack();
-
-
-  operations.emplace_back(LOAD, var->dependency);
 }
 
 void Code::read(Variable* var)
@@ -71,18 +75,59 @@ void Code::construct_val(Value* val)
   {
     Constant c = *(Constant*) val;
 
-    operations.emplace_back(SUB, 0);
+    auto number = c.value;
 
-    bool is_negative = c.value < 0;
-
-    for (int i=0; i<abs(c.value); i++)
+    if (number < 10)
     {
-      operations.emplace_back(is_negative ? DEC : INC);
+      operations.emplace_back(SUB, 0);
+      for (int i=0; i<number; i++)
+        operations.emplace_back(number > 0 ? INC : DEC);
+
+      return;
     }
+
+    auto result = memory->push_to_stack();
+    auto acc = memory->push_to_stack();
+    auto one = memory->push_to_stack();
+
+    operations.emplace_back(SUB, 0);
+    operations.emplace_back(STORE, result);
+    operations.emplace_back(INC);
+    operations.emplace_back(STORE, one);
+    
+    operations.emplace_back(SUB, 0);
+    operations.emplace_back(number > 0 ? INC : DEC);
+
+    while (number >= 1)
+    {
+      if (number % 2 == 1)
+      {
+        operations.emplace_back(STORE, acc);
+        operations.emplace_back(LOAD, result);
+        operations.emplace_back(ADD, acc);
+        operations.emplace_back(STORE, result);
+        operations.emplace_back(LOAD, acc);
+
+      }
+      operations.emplace_back(SHIFT, one);
+      number /= 2;
+    }
+
+    operations.emplace_back(LOAD, result);
+
+    memory->pop_from_stack();
+    memory->pop_from_stack();
+    memory->pop_from_stack();
+
     return;
   }
 
   Variable var = *(Variable*) val;
+
+  if (!var.is_initialized)
+  {
+    throw (string) (var.name + " is not initalized");
+  }
 
   if (!var.is_dependent())
   {
