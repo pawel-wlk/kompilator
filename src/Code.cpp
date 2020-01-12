@@ -262,6 +262,9 @@ void Code::multiply(Value* a, Value* b)
 
 void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsigned int one, unsigned int neg_one, unsigned int result, unsigned int multiple, unsigned int sign)
 {
+  operations.emplace_back(LOAD, scaled_divisor);
+  auto zero_divisor_jump = operations.size();
+  operations.emplace_back(JZERO, 0);
   // prepare variables
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
@@ -318,6 +321,11 @@ void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsig
   operations.emplace_back(STORE, multiple);
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, dividing_loop_start);
+
+  operations.emplace_back(JUMP, operations.size()+3);
+  operations[zero_divisor_jump].argument = operations.size();
+  operations.emplace_back(SUB, 0);
+  operations.emplace_back(STORE, remain);
 }
 void Code::divide(Value* a, Value* b)
 {
@@ -390,7 +398,7 @@ void Code::modulo(Value* a, Value* b)
     auto a_val = ((Constant*) a)->value;
     auto b_val = ((Constant*) b)->value;
     auto b_sign = (b_val > 0) - (b_val < 0);
-    Constant constant(abs(a_val%b_val) * b_sign);
+    Constant constant((a_val % b_val + b_val) % b_val);
     construct_val(&constant);
     return;
   }
