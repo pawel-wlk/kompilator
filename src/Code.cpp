@@ -283,6 +283,7 @@ void Code::divide(Value* a, Value* b)
   auto neg_one = memory->push_to_stack();
   auto result = memory->push_to_stack();
   auto multiple = memory->push_to_stack();
+  auto sign = memory->push_to_stack(); // if 0 result should be positive, otherwise negative
 
   construct_val(a);
   operations.emplace_back(STORE, remain);
@@ -290,12 +291,28 @@ void Code::divide(Value* a, Value* b)
   operations.emplace_back(STORE, scaled_divisor);
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
+  operations.emplace_back(STORE, sign);
   operations.emplace_back(INC);
   operations.emplace_back(STORE, one);
   operations.emplace_back(STORE, multiple);
   operations.emplace_back(DEC);
   operations.emplace_back(DEC);
   operations.emplace_back(STORE, neg_one);
+
+  // prepare signs
+  operations.emplace_back(LOAD, remain);
+  operations.emplace_back(JPOS, operations.size()+7);
+  operations.emplace_back(LOAD, sign);
+  operations.emplace_back(INC);
+  operations.emplace_back(STORE, sign);
+  flip_sign(remain);
+
+  operations.emplace_back(LOAD, scaled_divisor);
+  operations.emplace_back(JPOS, operations.size()+7);
+  operations.emplace_back(LOAD, sign);
+  operations.emplace_back(DEC);
+  operations.emplace_back(STORE, sign);
+  flip_sign(scaled_divisor);
 
   auto scaling_loop_start = operations.size();
   operations.emplace_back(LOAD, scaled_divisor);
@@ -328,6 +345,19 @@ void Code::divide(Value* a, Value* b)
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, dividing_loop_start);
 
+  // flip sign if needed
+  operations.emplace_back(LOAD, sign);
+  operations.emplace_back(JZERO, operations.size()+9);
+  flip_sign(result);
+  
+  // handle negative division rounding
+  operations.emplace_back(LOAD, remain);
+  operations.emplace_back(JZERO, operations.size()+4);
+  operations.emplace_back(LOAD, result);
+  operations.emplace_back(DEC);
+  operations.emplace_back(JUMP, operations.size()+2);
+
+
   operations.emplace_back(LOAD, result);
 
   memory->pop_from_stack();
@@ -336,7 +366,7 @@ void Code::divide(Value* a, Value* b)
   memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
-
+  memory->pop_from_stack();
 }
 
 void Code::modulo(Value* a, Value* b)
