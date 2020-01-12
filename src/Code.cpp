@@ -19,6 +19,17 @@ ostream& operator<<(ostream& os, Code& c)
   return os;
 }
 
+void Code::generate_memory_offset(string pid)
+{
+  auto var = memory->get_variable(pid);
+  memory->reserve_variable(pid + "/offset");
+  auto offset_var = memory->get_variable(pid+"/offset");
+  Constant offset(var->address - var->start);
+  construct_val(&offset);
+
+  operations.emplace_back(STORE, offset_var->address);
+}
+
 void Code::store(Variable* var)
 {
   if (var->is_iterator)
@@ -39,12 +50,8 @@ void Code::store(Variable* var)
 
   operations.emplace_back(STORE, stored_val);
 
-  Constant start(var->start);
-  construct_val(&start);
-
-  operations.emplace_back(STORE, tmp);
   operations.emplace_back(LOAD, var->dependency);
-  operations.emplace_back(SUB, tmp);
+  operations.emplace_back(ADD, memory->get_variable(var->name + "/offset")->address);
   operations.emplace_back(STORE, tmp);
 
   operations.emplace_back(LOAD, stored_val);
@@ -128,7 +135,7 @@ void Code::construct_val(Value* val)
 
   if (!var.is_initialized)
   {
-    throw (string) (var.name + " is not initalized");
+    throw (string) (var.name + " is not initalizedd");
   }
 
   if (!var.is_dependent())
@@ -137,17 +144,9 @@ void Code::construct_val(Value* val)
     return;
   }
 
-  Constant start(var.address - var.start);
-  construct_val(&start);
-  auto start_addr = memory->push_to_stack();
-
-  operations.emplace_back(STORE, start_addr);
   operations.emplace_back(LOAD, var.dependency);
-  operations.emplace_back(ADD, start_addr);
-
+  operations.emplace_back(ADD, memory->get_variable(var.name+"/offset")->address);
   operations.emplace_back(LOADI, 0);
-
-  memory->pop_from_stack();
 }
 
 // TODO fix dependent variables in arithmetics

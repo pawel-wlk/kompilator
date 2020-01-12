@@ -24,6 +24,7 @@ public:
   Code(Memory* memory);
   friend ostream& operator<<(ostream& os, Code& c);
 
+  void generate_memory_offset(string pid);
   void store(Variable* var);
   void read(Variable* var);
   void write(Value* val);

@@ -35,6 +35,7 @@ Variable* Memory::reserve_iterator(string pid)
 
   this->variables[pid] = new Variable(pid, ++this->var_count);
   this->variables[pid]->is_iterator = true;
+  this->variables[pid]->is_initialized = true;
 
   return this->variables[pid];
 }
@@ -98,10 +99,8 @@ Variable* Memory::get_variable(string pid, string index)
     throw (string) (index + " is not initialized");
   }
 
-  stringstream name;
-  name << pid <<"(" << index << ")";
 
-  return new Variable(name.str(), var->address, var->start, var->end, dependency->address);
+  return new Variable(pid, var->address, var->start, var->end, dependency->address);
 }
 
 unsigned int Memory::push_to_stack()
