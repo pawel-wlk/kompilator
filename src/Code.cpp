@@ -1,5 +1,7 @@
 #include "Code.hpp"
 
+#include<cmath>
+
 Code::Code(Memory* memory)
 {
   this->memory = memory;
@@ -19,7 +21,7 @@ ostream& operator<<(ostream& os, Code& c)
 
 void Code::store(Variable* var)
 {
-  if (!var->is_iterator)
+  if (var->is_iterator)
   {
     throw (string) ("Modification of for loop iterator " +  var->name);
   }
@@ -269,10 +271,71 @@ void Code::divide(Value* a, Value* b)
   {
     auto a_val = ((Constant*) a)->value;
     auto b_val = ((Constant*) b)->value;
-    Constant constant(a_val/b_val);
+    Constant constant(floor(((float)a_val) / ((float)b_val)));
     construct_val(&constant);
     return;
   }
+
+  // init variables
+  auto scaled_divisor = memory->push_to_stack();
+  auto remain = memory->push_to_stack();
+  auto one = memory->push_to_stack();
+  auto neg_one = memory->push_to_stack();
+  auto result = memory->push_to_stack();
+  auto multiple = memory->push_to_stack();
+
+  construct_val(a);
+  operations.emplace_back(STORE, remain);
+  construct_val(b);
+  operations.emplace_back(STORE, scaled_divisor);
+  operations.emplace_back(SUB, 0);
+  operations.emplace_back(STORE, result);
+  operations.emplace_back(INC);
+  operations.emplace_back(STORE, one);
+  operations.emplace_back(STORE, multiple);
+  operations.emplace_back(DEC);
+  operations.emplace_back(DEC);
+  operations.emplace_back(STORE, neg_one);
+
+  auto scaling_loop_start = operations.size();
+  operations.emplace_back(LOAD, scaled_divisor);
+  operations.emplace_back(SUB, remain);
+  operations.emplace_back(JPOS, operations.size()+8);
+  operations.emplace_back(LOAD, multiple);
+  operations.emplace_back(SHIFT, one);
+  operations.emplace_back(STORE, multiple);
+  operations.emplace_back(LOAD, scaled_divisor);
+  operations.emplace_back(SHIFT, one);
+  operations.emplace_back(STORE, scaled_divisor);
+  operations.emplace_back(JUMP, scaling_loop_start);
+
+  auto dividing_loop_start = operations.size();
+
+  operations.emplace_back(LOAD, remain);
+  operations.emplace_back(SUB, scaled_divisor);
+  operations.emplace_back(JNEG, operations.size()+5);
+  operations.emplace_back(STORE, remain);
+  operations.emplace_back(LOAD, result);
+  operations.emplace_back(ADD, multiple);
+  operations.emplace_back(STORE, result);
+
+  operations.emplace_back(LOAD, scaled_divisor);
+  operations.emplace_back(SHIFT, neg_one);
+  operations.emplace_back(STORE, scaled_divisor);
+  operations.emplace_back(LOAD, multiple);
+  operations.emplace_back(SHIFT, neg_one);
+  operations.emplace_back(STORE, multiple);
+  operations.emplace_back(JZERO, operations.size()+2);
+  operations.emplace_back(JUMP, dividing_loop_start);
+
+  operations.emplace_back(LOAD, result);
+
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
 
 }
 
