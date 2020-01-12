@@ -1,0 +1,8 @@
+DECLARE
+  a, b, result
+BEGIN
+  READ a;
+  READ b;
+  result ASSIGN a MOD b;
+  WRITE result;
+END

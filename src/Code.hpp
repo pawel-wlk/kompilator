@@ -19,6 +19,7 @@ private:
   vector<Operation> operations;
 
   void flip_sign(unsigned int addr);
+  void division_core(unsigned int scaled_divisor, unsigned int remain, unsigned int one, unsigned int neg_one, unsigned int result, unsigned int multiple, unsigned int sign);
 public:
   Code(Memory* memory);
   friend ostream& operator<<(ostream& os, Code& c);

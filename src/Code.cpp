@@ -260,35 +260,9 @@ void Code::multiply(Value* a, Value* b)
   memory->pop_from_stack();
 }
 
-void Code::divide(Value* a, Value* b)
+void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsigned int one, unsigned int neg_one, unsigned int result, unsigned int multiple, unsigned int sign)
 {
-  if (b->is_constant() && ((Constant*) b)->value == 0)
-  {
-    Constant constant(0);
-  }
-
-  if (a->is_constant() && b->is_constant())
-  {
-    auto a_val = ((Constant*) a)->value;
-    auto b_val = ((Constant*) b)->value;
-    Constant constant(floor(((float)a_val) / ((float)b_val)));
-    construct_val(&constant);
-    return;
-  }
-
-  // init variables
-  auto scaled_divisor = memory->push_to_stack();
-  auto remain = memory->push_to_stack();
-  auto one = memory->push_to_stack();
-  auto neg_one = memory->push_to_stack();
-  auto result = memory->push_to_stack();
-  auto multiple = memory->push_to_stack();
-  auto sign = memory->push_to_stack(); // if 0 result should be positive, otherwise negative
-
-  construct_val(a);
-  operations.emplace_back(STORE, remain);
-  construct_val(b);
-  operations.emplace_back(STORE, scaled_divisor);
+  // prepare variables
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
   operations.emplace_back(STORE, sign);
@@ -344,6 +318,39 @@ void Code::divide(Value* a, Value* b)
   operations.emplace_back(STORE, multiple);
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, dividing_loop_start);
+}
+void Code::divide(Value* a, Value* b)
+{
+  if (b->is_constant() && ((Constant*) b)->value == 0)
+  {
+    Constant constant(0);
+    construct_val(&constant);
+    return;
+  }
+
+  if (a->is_constant() && b->is_constant())
+  {
+    auto a_val = ((Constant*) a)->value;
+    auto b_val = ((Constant*) b)->value;
+    Constant constant(floor(((float)a_val) / ((float)b_val)));
+    construct_val(&constant);
+    return;
+  }
+
+  auto scaled_divisor = memory->push_to_stack();
+  auto remain = memory->push_to_stack();
+  auto one = memory->push_to_stack();
+  auto neg_one = memory->push_to_stack();
+  auto result = memory->push_to_stack();
+  auto multiple = memory->push_to_stack();
+  auto sign = memory->push_to_stack(); // if 0 result should be positive, otherwise negative
+
+  construct_val(a);
+  operations.emplace_back(STORE, remain);
+  construct_val(b);
+  operations.emplace_back(STORE, scaled_divisor);
+
+  division_core(scaled_divisor, remain, one, neg_one, result, multiple, sign);
 
   // flip sign if needed
   operations.emplace_back(LOAD, sign);
@@ -374,6 +381,8 @@ void Code::modulo(Value* a, Value* b)
   if (b->is_constant() && ((Constant*) b)->value == 0)
   {
     Constant constant(0);
+    construct_val(&constant);
+    return;
   }
 
   if (a->is_constant() && b->is_constant())
@@ -386,7 +395,53 @@ void Code::modulo(Value* a, Value* b)
     return;
   }
 
-  // TODO figure out modulo
+  auto scaled_divisor = memory->push_to_stack();
+  auto remain = memory->push_to_stack();
+  auto one = memory->push_to_stack();
+  auto neg_one = memory->push_to_stack();
+  auto result = memory->push_to_stack();
+  auto multiple = memory->push_to_stack();
+  auto sign = memory->push_to_stack();
+
+  construct_val(a);
+  operations.emplace_back(STORE, remain);
+  construct_val(b);
+  operations.emplace_back(STORE, scaled_divisor);
+
+  division_core(scaled_divisor, remain, one, neg_one, result, multiple, sign);
+
+  // modulo if  else shittery
+  operations.emplace_back(LOAD, remain);
+  auto remain_zero_jump = operations.size();
+  operations.emplace_back(JZERO, 0);
+
+
+  construct_val(a);
+  
+  operations.emplace_back(JPOS, operations.size()+4);
+  flip_sign(remain);
+
+  operations.emplace_back(LOAD, sign);
+  auto jump_to_end = operations.size();
+  operations.emplace_back(JZERO, 0);
+
+  construct_val(b);
+
+  operations.emplace_back(ADD, remain);
+  operations.emplace_back(STORE, remain);
+  operations[jump_to_end].argument = operations.size();
+  operations[remain_zero_jump].argument = operations.size();
+
+  operations.emplace_back(LOAD, remain);
+
+
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
+  memory->pop_from_stack();
 }
 
 ConditionLabel* Code::equal(Value* a, Value* b)
