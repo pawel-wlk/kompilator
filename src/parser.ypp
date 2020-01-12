@@ -25,6 +25,8 @@ Memory* memory;
 
 %}
 
+%define parse.error verbose
+
 %union token_val {
     string* pid;
     long long num;
