@@ -49,7 +49,6 @@ Memory* memory;
 %token READ WRITE       
 %token LE GE LEQ GEQ EQ NEQ
 %token ASSIGN
-%token ERROR
 
 %token <pid> PID
 %token <num> NUM

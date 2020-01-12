@@ -397,7 +397,6 @@ void Code::modulo(Value* a, Value* b)
   {
     auto a_val = ((Constant*) a)->value;
     auto b_val = ((Constant*) b)->value;
-    auto b_sign = (b_val > 0) - (b_val < 0);
     Constant constant((a_val % b_val + b_val) % b_val);
     construct_val(&constant);
     return;

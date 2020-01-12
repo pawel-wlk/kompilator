@@ -1,5 +1,6 @@
 %option noyywrap
 %option yylineno
+%option nounput
 %{
 
 #include "../src/Variable.hpp"
@@ -71,5 +72,4 @@ int yylex();
 }
 
 [ \t\r\n]+              ; 
-.                       { return ERROR; }
 %%
