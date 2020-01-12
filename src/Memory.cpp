@@ -11,7 +11,7 @@ void Memory::reserve_variable(string pid)
   this->variables[pid] = new Variable(pid, ++this->var_count);
 }
 
-void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
+void Memory::reserve_array(string pid, int start, int end)
 {
   if (this->variables.find(pid) != this->variables.end())
   {
@@ -19,7 +19,7 @@ void Memory::reserve_array(string pid, unsigned int start, unsigned int end)
   }
   if (start > end)
   {
-    throw (string) "Wrong range of array " + pid;
+    throw (string) "Wrong range of array " + pid + " " + to_string(start) + " to " + to_string(end);
   }
   this->variables[pid] = new Variable(pid, this->var_count+1, start, end);
   auto length = end - start + 1;
@@ -60,7 +60,7 @@ Variable* Memory::get_variable(string pid)
   return var;
 }
 
-Variable* Memory::get_variable(string pid, unsigned int index)
+Variable* Memory::get_variable(string pid, int index)
 {
   if (this->variables.find(pid) == this->variables.end())
   {
@@ -77,7 +77,9 @@ Variable* Memory::get_variable(string pid, unsigned int index)
   stringstream name;
   name << pid <<"(" << index << ")";
 
-  return new Variable(name.str(), address);
+  auto result = new Variable(name.str(), address);
+  result->is_initialized = true;
+  return result;
 }
 
 Variable* Memory::get_variable(string pid, string index)

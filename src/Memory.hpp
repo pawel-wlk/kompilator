@@ -12,11 +12,11 @@ class Memory
 {
 public:
   void reserve_variable(string pid);
-  void reserve_array(string pid, unsigned int start, unsigned int end);
+  void reserve_array(string pid, int start, int end);
   Variable* reserve_iterator(string pid);
   void destroy_iterator(string pid);
   Variable* get_variable(string pid);
-  Variable* get_variable(string pid, unsigned int index);
+  Variable* get_variable(string pid, int index);
   Variable* get_variable(string pid, string index);
   unsigned int push_to_stack();
   unsigned int pop_from_stack();

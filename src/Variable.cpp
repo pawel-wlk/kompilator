@@ -5,6 +5,7 @@ Variable::Variable(string name, unsigned int address)
   this->address = address;
   this->is_array = false;
   this->is_initialized = false;
+  this->is_iterator = false;
   this->name = name;
 }
 

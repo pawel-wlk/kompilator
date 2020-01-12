@@ -86,10 +86,10 @@ void Code::construct_val(Value* val)
 
     auto number = c.value;
 
-    if (number < 10)
+    if (abs(number) < 10)
     {
       operations.emplace_back(SUB, 0);
-      for (int i=0; i<number; i++)
+      for (int i=0; i<abs(number); i++)
         operations.emplace_back(number > 0 ? INC : DEC);
 
       return;
@@ -107,6 +107,7 @@ void Code::construct_val(Value* val)
     operations.emplace_back(SUB, 0);
     operations.emplace_back(number > 0 ? INC : DEC);
 
+    number = abs(number);
     while (number >= 1)
     {
       if (number % 2 == 1)
