@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 
 #include "../src/Memory.hpp"
@@ -144,7 +145,7 @@ int main(int argc, char* argv[])
     // yydebug = 1;
     if (argc != 3)
     {
-        cout << "Not enough arguments" << argc << endl;
+        cout << "Not enough arguments" << endl;
         return 1;
     }
 
@@ -152,6 +153,11 @@ int main(int argc, char* argv[])
     code = new Code(memory);
 
     yyin = fopen(argv[1], "r");
+    if (yyin == NULL)
+    {
+        cout << "File " << argv[1] << " does not exist" << endl;
+        return 1;
+    }
     try
     {
         yyparse();
