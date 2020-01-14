@@ -1,0 +1,7 @@
+DECLARE 
+  a
+BEGIN
+  READ a;
+  a ASSIGN a MINUS -3;
+  WRITE a;
+END

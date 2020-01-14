@@ -197,6 +197,14 @@ void Code::subtract(Value* a, Value* b)
     construct_val(a);
     operations.emplace_back(SUB, ((Variable*)b)->address);
   }
+  else if (b->is_constant() && (llabs(((Constant*)b)->value) < 10))
+  {
+    construct_val(a);
+    for (int i=0; i<llabs(((Constant*)b)->value); i++)
+    {
+      operations.emplace_back(((Constant*)b)->value > 0 ? DEC : INC);
+    }
+  }
   else {
     construct_val(b);
     operations.emplace_back(STORE, memory->push_to_stack());
@@ -474,10 +482,7 @@ void Code::modulo(Value* a, Value* b)
 ConditionLabel* Code::equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(a, b);
 
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, 0); // replace later with address of block's end
@@ -489,10 +494,7 @@ ConditionLabel* Code::equal(Value* a, Value* b)
 ConditionLabel* Code::not_equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(a, b);
 
   operations.emplace_back(JZERO, 0); // replace later with address of block's end
 
@@ -502,10 +504,7 @@ ConditionLabel* Code::not_equal(Value* a, Value* b)
 ConditionLabel* Code::greater_or_equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(b, a);
 
   operations.emplace_back(JPOS, 0); // replace later with address of block's end
 
@@ -515,10 +514,7 @@ ConditionLabel* Code::greater_or_equal(Value* a, Value* b)
 ConditionLabel* Code::less_or_equal(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(b, a);
 
   operations.emplace_back(JNEG, 0); // replace later with address of block's end
 
@@ -528,10 +524,7 @@ ConditionLabel* Code::less_or_equal(Value* a, Value* b)
 ConditionLabel* Code::greater(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(b, a);
 
   operations.emplace_back(JNEG, operations.size()+2);
   operations.emplace_back(JUMP, 0); // replace later with address of block's end
@@ -542,10 +535,7 @@ ConditionLabel* Code::greater(Value* a, Value* b)
 ConditionLabel* Code::less(Value* a, Value* b)
 {
   auto start_addr = operations.size();
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+  subtract(b, a);
 
   operations.emplace_back(JPOS, operations.size()+2);
   operations.emplace_back(JUMP, 0); // replace later with address of block's end
