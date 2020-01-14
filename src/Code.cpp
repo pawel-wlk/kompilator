@@ -150,7 +150,6 @@ void Code::construct_val(Value* val)
   operations.emplace_back(LOADI, 0);
 }
 
-// TODO fix dependent variables in arithmetics
 void Code::add(Value* a, Value* b)
 {
   if (a->is_constant() && b->is_constant())
@@ -162,10 +161,23 @@ void Code::add(Value* a, Value* b)
     return;
   }
 
-  construct_val(a);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(b);
-  operations.emplace_back(ADD, memory->pop_from_stack());
+  if (!a->is_constant() && !((Variable*)a)->is_dependent())
+  {
+    construct_val(b);
+    operations.emplace_back(ADD, ((Variable*)a)->address);
+  }
+  else if (!b->is_constant() && !((Variable*)b)->is_dependent())
+  {
+    construct_val(a);
+    operations.emplace_back(ADD, ((Variable*)b)->address);
+  }
+  else
+  {
+    construct_val(a);
+    operations.emplace_back(STORE, memory->push_to_stack());
+    construct_val(b);
+    operations.emplace_back(ADD, memory->pop_from_stack());
+  }
 }
 
 void Code::subtract(Value* a, Value* b)
@@ -179,10 +191,18 @@ void Code::subtract(Value* a, Value* b)
     return;
   }
 
-  construct_val(b);
-  operations.emplace_back(STORE, memory->push_to_stack());
-  construct_val(a);
-  operations.emplace_back(SUB, memory->pop_from_stack());
+
+  if (!b->is_constant() && !((Variable*)b)->is_dependent())
+  {
+    construct_val(a);
+    operations.emplace_back(SUB, ((Variable*)b)->address);
+  }
+  else {
+    construct_val(b);
+    operations.emplace_back(STORE, memory->push_to_stack());
+    construct_val(a);
+    operations.emplace_back(SUB, memory->pop_from_stack());
+  }
 }
 
 
