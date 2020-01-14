@@ -29,6 +29,8 @@ struct ForLabel
   Variable* iterator;
   ConditionLabel* condition;
 
-  ForLabel(Variable* iterator, ConditionLabel* condition);
+  unsigned int end_loop_addr;
+
+  ForLabel(Variable* iterator, ConditionLabel* condition, unsigned int end_loop_addr);
   ~ForLabel();
 };

@@ -17,10 +17,11 @@ DoWhileLabel::DoWhileLabel(unsigned long long loop_start)
   this->loop_start = loop_start;
 }
 
-ForLabel::ForLabel(Variable* iterator, ConditionLabel* condition)
+ForLabel::ForLabel(Variable* iterator, ConditionLabel* condition, unsigned int end_loop_addr)
 {
   this->iterator = iterator;
   this->condition = condition;
+  this->end_loop_addr = end_loop_addr;
 }
 
 ForLabel::~ForLabel()

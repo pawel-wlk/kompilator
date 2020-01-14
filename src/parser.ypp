@@ -144,7 +144,7 @@ int yyerror(string s)
 int main(int argc, char* argv[])
 {
     // yydebug = 1;
-    if (argc != 3)
+    if (argc < 2)
     {
         cout << "Not enough arguments" << endl;
         return 1;
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     {
         yyparse();
         ofstream output;
-        output.open(argv[2]);
+        output.open(argc >= 3 ? argv[2] : "out.mr");
         output << *code;
         output.close();
     }

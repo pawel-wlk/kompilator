@@ -582,12 +582,21 @@ void Code::do_loop_second(DoWhileLabel* do_lbl, ConditionLabel* condition)
 ForLabel* Code::for_loop_first(string iterator_name, Value* start, Value* end, bool ascending)
 {
   auto iterator = memory->reserve_iterator(iterator_name);
+  auto end_addr = memory->push_to_stack();
+  construct_val(end);
+  operations.emplace_back(STORE, end_addr);
   construct_val(start);
   operations.emplace_back(STORE, iterator->address);
 
-  auto condition = ascending ? less_or_equal(iterator, end) : greater_or_equal(iterator, end);
+  // auto condition = ascending ? less_or_equal(iterator, end) : greater_or_equal(iterator, end);
+  auto considtion_start_addr = operations.size();
+  operations.emplace_back(SUB, end_addr);
+  auto jump_addr = operations.size();
+  operations.emplace_back(ascending ? JPOS : JNEG, 0);
 
-  return new ForLabel(iterator, condition);
+  auto condition = new ConditionLabel(considtion_start_addr, jump_addr);
+
+  return new ForLabel(iterator, condition, end_addr);
 }
 
 
@@ -600,5 +609,8 @@ void Code::for_loop_second(ForLabel* loop, bool ascending)
   operations.emplace_back(JUMP, loop->condition->start);
   operations[loop->condition->jump].argument = operations.size();
 
+  memory->pop_from_stack();
   memory->destroy_iterator(loop->iterator->name);
+
+  delete loop;
 }
