@@ -97,7 +97,7 @@ void Code::construct_val(Value* val)
 
     auto number = c.value;
 
-    if (abs(number) < 10)
+    if (abs(number) < 32)
     {
       operations.emplace_back(SUB, 0);
       for (int i=0; i<abs(number); i++)
@@ -114,7 +114,6 @@ void Code::construct_val(Value* val)
     operations.emplace_back(SUB, 0);
     operations.emplace_back(STORE, result);
     
-    operations.emplace_back(SUB, 0);
     operations.emplace_back(number > 0 ? INC : DEC);
 
     number = abs(number);
@@ -123,8 +122,7 @@ void Code::construct_val(Value* val)
       if (number % 2 == 1)
       {
         operations.emplace_back(STORE, acc);
-        operations.emplace_back(LOAD, result);
-        operations.emplace_back(ADD, acc);
+        operations.emplace_back(ADD, result);
         operations.emplace_back(STORE, result);
         operations.emplace_back(LOAD, acc);
 

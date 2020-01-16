@@ -85,6 +85,7 @@ Variable* Memory::get_variable(string pid, int index)
 
   auto result = new Variable(name.str(), address);
   result->is_initialized = true;
+  result->dependency = 0;
   return result;
 }
 
