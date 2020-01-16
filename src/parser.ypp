@@ -153,6 +153,8 @@ int main(int argc, char* argv[])
     memory = new Memory();
     code = new Code(memory);
 
+    code->construct_constants();
+
     yyin = fopen(argv[1], "r");
     if (yyin == NULL)
     {

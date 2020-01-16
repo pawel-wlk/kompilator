@@ -19,6 +19,17 @@ ostream& operator<<(ostream& os, Code& c)
   return os;
 }
 
+void Code::construct_constants()
+{
+  memory->reserve_constants();
+  operations.emplace_back(SUB, 0);
+  operations.emplace_back(INC);
+  operations.emplace_back(STORE, memory->get_variable("1")->address);
+  operations.emplace_back(DEC);
+  operations.emplace_back(DEC);
+  operations.emplace_back(STORE, memory->get_variable("-1")->address);
+}
+
 void Code::generate_memory_offset(string pid)
 {
   auto var = memory->get_variable(pid);
@@ -95,14 +106,13 @@ void Code::construct_val(Value* val)
       return;
     }
 
+    auto one = memory->get_variable("1")->address;
+
     auto result = memory->push_to_stack();
     auto acc = memory->push_to_stack();
-    auto one = memory->push_to_stack();
 
     operations.emplace_back(SUB, 0);
     operations.emplace_back(STORE, result);
-    operations.emplace_back(INC);
-    operations.emplace_back(STORE, one);
     
     operations.emplace_back(SUB, 0);
     operations.emplace_back(number > 0 ? INC : DEC);
@@ -125,7 +135,6 @@ void Code::construct_val(Value* val)
 
     operations.emplace_back(LOAD, result);
 
-    memory->pop_from_stack();
     memory->pop_from_stack();
     memory->pop_from_stack();
 
@@ -232,19 +241,14 @@ void Code::multiply(Value* a, Value* b)
     return;
   }
 
+  auto one = memory->get_variable("1")->address;
+  auto neg_one = memory->get_variable("-1")->address;
   auto result = memory->push_to_stack();
-  auto one = memory->push_to_stack();
-  auto neg_one = memory->push_to_stack();
   auto a_addr = memory->push_to_stack();
   auto b_addr = memory->push_to_stack();
 
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
-  operations.emplace_back(DEC);
-  operations.emplace_back(STORE, neg_one);
-  operations.emplace_back(INC);
-  operations.emplace_back(INC);
-  operations.emplace_back(STORE, one);
 
   construct_val(b);
   operations.emplace_back(STORE, b_addr);
@@ -284,8 +288,6 @@ void Code::multiply(Value* a, Value* b)
   memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
 }
 
 void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsigned int one, unsigned int neg_one, unsigned int result, unsigned int multiple, unsigned int sign)
@@ -301,11 +303,7 @@ void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsig
   operations.emplace_back(STORE, result);
   operations.emplace_back(STORE, sign);
   operations.emplace_back(INC);
-  operations.emplace_back(STORE, one);
   operations.emplace_back(STORE, multiple);
-  operations.emplace_back(DEC);
-  operations.emplace_back(DEC);
-  operations.emplace_back(STORE, neg_one);
 
   // prepare signs
   operations.emplace_back(LOAD, remain);
@@ -384,18 +382,16 @@ void Code::divide(Value* a, Value* b)
 
   if (b->is_constant() && ((Constant*) b)->value == 2)
   {
-    operations.emplace_back(SUB, 0);
-    operations.emplace_back(DEC);
-    operations.emplace_back(STORE, memory->push_to_stack());
     construct_val(a);
-    operations.emplace_back(SHIFT, memory->pop_from_stack());
+    operations.emplace_back(SHIFT, memory->get_variable("-1")->address);
     return;
   }
 
+  auto one = memory->get_variable("1")->address;
+  auto neg_one = memory->get_variable("-1")->address;
+
   auto scaled_divisor = memory->push_to_stack();
   auto remain = memory->push_to_stack();
-  auto one = memory->push_to_stack();
-  auto neg_one = memory->push_to_stack();
   auto result = memory->push_to_stack();
   auto multiple = memory->push_to_stack();
   auto sign = memory->push_to_stack(); // if 0 result should be positive, otherwise negative
@@ -427,8 +423,6 @@ void Code::divide(Value* a, Value* b)
   memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
-  memory->pop_from_stack();
-  memory->pop_from_stack();
 }
 
 void Code::modulo(Value* a, Value* b)
@@ -451,16 +445,10 @@ void Code::modulo(Value* a, Value* b)
 
   if (b->is_constant() && llabs(((Constant*) b)->value) == 2)
   {
-    auto one = memory->push_to_stack();
-    auto neg_one = memory->push_to_stack();
+    auto one = memory->get_variable("1")->address;
+    auto neg_one = memory->get_variable("-1")->address;
     auto a_addr = memory->push_to_stack();
 
-    operations.emplace_back(SUB, 0);
-    operations.emplace_back(INC);
-    operations.emplace_back(STORE, one);
-    operations.emplace_back(DEC);
-    operations.emplace_back(DEC);
-    operations.emplace_back(STORE, neg_one);
     construct_val(a);
     operations.emplace_back(STORE, a_addr);
 
@@ -476,16 +464,15 @@ void Code::modulo(Value* a, Value* b)
     }
 
     memory->pop_from_stack();
-    memory->pop_from_stack();
-    memory->pop_from_stack();
 
     return;
   }
 
+  auto one = memory->get_variable("1")->address;
+  auto neg_one = memory->get_variable("-1")->address;
+
   auto scaled_divisor = memory->push_to_stack();
   auto remain = memory->push_to_stack();
-  auto one = memory->push_to_stack();
-  auto neg_one = memory->push_to_stack();
   auto result = memory->push_to_stack();
   auto multiple = memory->push_to_stack();
   auto sign = memory->push_to_stack();
@@ -522,8 +509,6 @@ void Code::modulo(Value* a, Value* b)
   operations.emplace_back(LOAD, remain);
 
 
-  memory->pop_from_stack();
-  memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();

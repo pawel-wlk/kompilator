@@ -2,6 +2,12 @@
 
 #include<sstream>
 
+void Memory::reserve_constants()
+{
+  this->variables["1"] = new Variable("1", ++this->var_count);
+  this->variables["-1"] = new Variable("-1", ++this->var_count);
+}
+
 void Memory::reserve_variable(string pid)
 {
   if (this->variables.find(pid) != this->variables.end())

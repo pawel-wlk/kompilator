@@ -11,6 +11,7 @@ using namespace std;
 class Memory
 {
 public:
+  void reserve_constants();
   void reserve_variable(string pid);
   void reserve_array(string pid, int start, int end);
   Variable* reserve_iterator(string pid);
