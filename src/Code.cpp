@@ -243,21 +243,44 @@ void Code::multiply(Value* a, Value* b)
 
   auto one = memory->get_variable("1")->address;
   auto neg_one = memory->get_variable("-1")->address;
+
   auto result = memory->push_to_stack();
+  auto sign = memory->push_to_stack();
   auto a_addr = memory->push_to_stack();
   auto b_addr = memory->push_to_stack();
 
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
+  operations.emplace_back(STORE, sign);
 
   construct_val(b);
   operations.emplace_back(STORE, b_addr);
-  construct_val(a);
-  operations.emplace_back(STORE, a_addr);
-
   operations.emplace_back(JPOS, operations.size()+7);
   flip_sign(b_addr);
+  operations.emplace_back(LOAD, sign);
+  operations.emplace_back(INC);
+  operations.emplace_back(STORE, sign);
+
+  construct_val(a);
+  operations.emplace_back(STORE, a_addr);
+  operations.emplace_back(JPOS, operations.size()+7);
   flip_sign(a_addr);
+  operations.emplace_back(LOAD, sign);
+  operations.emplace_back(DEC);
+  operations.emplace_back(STORE, sign);
+
+  // use smaller number as a multiplier
+  operations.emplace_back(LOAD, a_addr);
+  operations.emplace_back(SUB, b_addr);
+  operations.emplace_back(JNEG, operations.size()+7);
+
+  operations.emplace_back(LOAD, a_addr);
+  operations.emplace_back(STORE, memory->push_to_stack());
+  operations.emplace_back(LOAD, b_addr);
+  operations.emplace_back(STORE, a_addr);
+  operations.emplace_back(LOAD, memory->pop_from_stack());
+  operations.emplace_back(STORE, b_addr);
+
 
   auto start_counter = operations.size();
 
@@ -283,8 +306,18 @@ void Code::multiply(Value* a, Value* b)
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, start_counter);
 
+  operations.emplace_back(LOAD, sign);
+
+  operations.emplace_back(JZERO, operations.size()+4);
+
+  operations.emplace_back(SUB, 0);
+  operations.emplace_back(SUB, result);
+  operations.emplace_back(JUMP, operations.size()+2);
+  
   operations.emplace_back(LOAD, result);
 
+
+  memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
   memory->pop_from_stack();
