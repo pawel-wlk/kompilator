@@ -373,6 +373,16 @@ void Code::divide(Value* a, Value* b)
     return;
   }
 
+  if (b->is_constant() && ((Constant*) b)->value == 2)
+  {
+    operations.emplace_back(SUB, 0);
+    operations.emplace_back(DEC);
+    operations.emplace_back(STORE, memory->push_to_stack());
+    construct_val(a);
+    operations.emplace_back(SHIFT, memory->pop_from_stack());
+    return;
+  }
+
   auto scaled_divisor = memory->push_to_stack();
   auto remain = memory->push_to_stack();
   auto one = memory->push_to_stack();
@@ -427,6 +437,39 @@ void Code::modulo(Value* a, Value* b)
     auto b_val = ((Constant*) b)->value;
     Constant constant((a_val % b_val + b_val) % b_val);
     construct_val(&constant);
+    return;
+  }
+
+  if (b->is_constant() && llabs(((Constant*) b)->value) == 2)
+  {
+    auto one = memory->push_to_stack();
+    auto neg_one = memory->push_to_stack();
+    auto a_addr = memory->push_to_stack();
+
+    operations.emplace_back(SUB, 0);
+    operations.emplace_back(INC);
+    operations.emplace_back(STORE, one);
+    operations.emplace_back(DEC);
+    operations.emplace_back(DEC);
+    operations.emplace_back(STORE, neg_one);
+    construct_val(a);
+    operations.emplace_back(STORE, a_addr);
+
+    operations.emplace_back(SHIFT, neg_one);
+    operations.emplace_back(SHIFT, one);
+    operations.emplace_back(SUB, a_addr);
+
+    if (((Constant*) b)-> value > 0)
+    {
+      operations.emplace_back(JZERO, operations.size()+3);
+      operations.emplace_back(INC);
+      operations.emplace_back(INC);
+    }
+
+    memory->pop_from_stack();
+    memory->pop_from_stack();
+    memory->pop_from_stack();
+
     return;
   }
 
