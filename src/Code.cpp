@@ -293,6 +293,9 @@ void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsig
   operations.emplace_back(LOAD, scaled_divisor);
   auto zero_divisor_jump = operations.size();
   operations.emplace_back(JZERO, 0);
+  operations.emplace_back(SUB, remain);
+  auto equal_jump = operations.size();
+  operations.emplace_back(JZERO, 0);
   // prepare variables
   operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, result);
@@ -350,10 +353,16 @@ void Code::division_core(unsigned int scaled_divisor, unsigned int remain, unsig
   operations.emplace_back(JZERO, operations.size()+2);
   operations.emplace_back(JUMP, dividing_loop_start);
 
-  operations.emplace_back(JUMP, operations.size()+3);
+  operations.emplace_back(JUMP, operations.size()+7);
   operations[zero_divisor_jump].argument = operations.size();
-  operations.emplace_back(SUB, 0);
   operations.emplace_back(STORE, remain);
+  operations.emplace_back(STORE, result);
+
+  operations.emplace_back(JUMP, operations.size()+4);
+  operations[equal_jump].argument = operations.size();
+  operations.emplace_back(STORE, remain);
+  operations.emplace_back(INC);
+  operations.emplace_back(STORE, result);
 }
 void Code::divide(Value* a, Value* b)
 {
