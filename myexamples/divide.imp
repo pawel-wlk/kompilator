@@ -1,8 +1,7 @@
 DECLARE
-  a, b, result
+  a, result
 BEGIN
-  READ a;
-  READ b;
-  result ASSIGN a DIV b;
+  a ASSIGN 120;
+  result ASSIGN a DIV 4;
   WRITE result;
 END

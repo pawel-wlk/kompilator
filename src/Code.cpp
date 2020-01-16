@@ -413,11 +413,19 @@ void Code::divide(Value* a, Value* b)
     return;
   }
 
-  if (b->is_constant() && ((Constant*) b)->value == 2)
+  if (b->is_constant())
   {
-    construct_val(a);
-    operations.emplace_back(SHIFT, memory->get_variable("-1")->address);
-    return;
+    auto b_val = ((Constant*) b)->value;
+    auto log2b = log2(b_val);
+
+    if (ceil(log2b) == floor(log2b))
+    {
+      construct_val(a);
+      auto neg_one = memory->get_variable("-1")->address;
+      for (int i=0; i<log2b; i++)
+        operations.emplace_back(SHIFT, neg_one);
+      return;
+    }
   }
 
   auto one = memory->get_variable("1")->address;
