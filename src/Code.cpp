@@ -106,28 +106,29 @@ void Code::construct_val(Value* val)
       return;
     }
 
-    auto one = memory->get_variable("1")->address;
+    auto one = memory->get_variable(number > 0 ? "1" : "-1")->address;
 
     auto result = memory->push_to_stack();
-    auto acc = memory->push_to_stack();
+    auto counter = memory->push_to_stack();
 
     operations.emplace_back(SUB, 0);
     operations.emplace_back(STORE, result);
     
-    operations.emplace_back(number > 0 ? INC : DEC);
-
     number = abs(number);
+    int count = 0;
     while (number >= 1)
     {
       if (number % 2 == 1)
       {
-        operations.emplace_back(STORE, acc);
+        operations.emplace_back(STORE, counter);
+        operations.emplace_back(LOAD, one);
+        operations.emplace_back(SHIFT, counter);
         operations.emplace_back(ADD, result);
         operations.emplace_back(STORE, result);
-        operations.emplace_back(LOAD, acc);
-
+        operations.emplace_back(LOAD, counter);
       }
-      operations.emplace_back(SHIFT, one);
+      operations.emplace_back(INC);
+      count++;
       number /= 2;
     }
 
