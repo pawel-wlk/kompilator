@@ -133,7 +133,7 @@ void Code::construct_val(Value* val)
 
   if (!var.is_initialized)
   {
-    throw (string) (var.name + " is not initalizedd");
+    cout << "Warning: Variable " << var.name << " might not be initialized" << endl;
   }
 
   if (!var.is_dependent())
