@@ -138,6 +138,7 @@ int yyerror(string s)
          << "Error in line " << yylineno << ": " 
          << "\033[0m"
          << s << endl;
+    exit(1);
     return 0;
 }
 
@@ -172,7 +173,6 @@ int main(int argc, char* argv[])
     catch (string error)
     {
         yyerror(error);
-        return 1;
     }
 
     return 0;
