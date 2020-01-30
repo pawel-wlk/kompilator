@@ -47,6 +47,10 @@ void Code::store(Variable* var)
   {
     throw (string) ("Modification of for loop iterator " +  var->name);
   }
+  if (var->is_array)
+  {
+    throw (string) ("Invalid use of an array " + var->name);
+  }
 
   var->is_initialized = true;
 
@@ -130,6 +134,12 @@ void Code::construct_val(Value* val)
   }
 
   Variable var = *(Variable*) val;
+
+  if (var.is_array)
+  {
+    throw (string) ("Invalid use of an array " + var.name);
+  }
+
 
   if (!var.is_initialized)
   {

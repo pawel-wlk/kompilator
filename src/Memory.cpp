@@ -1,6 +1,7 @@
 #include "Memory.hpp"
 
 #include<sstream>
+#include<iostream>
 
 void Memory::reserve_constants()
 {
@@ -101,6 +102,10 @@ Variable* Memory::get_variable(string pid, string index)
   {
     throw (string) pid + " is not an array";
   }
+  if (this->variables.find(index) == this->variables.end())
+  {
+    throw (string) index + " is not defined";
+  }
   auto dependency = this->variables[index];
 
   if (!dependency->is_initialized)
@@ -109,7 +114,11 @@ Variable* Memory::get_variable(string pid, string index)
   }
 
 
-  return new Variable(pid, var->address, var->start, var->end, dependency->address);
+  auto new_var = new Variable(pid, var->address, var->start, var->end, dependency->address);
+  new_var->is_array = false;
+
+  return new_var;
+
 }
 
 unsigned int Memory::push_to_stack()
