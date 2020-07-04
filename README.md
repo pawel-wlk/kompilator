@@ -1,6 +1,6 @@
 # Kompilator
 
-by Paweł Wilkosz, 244912
+by Paweł Wilkosz
 
 # Zależności
 - bison 3.5
